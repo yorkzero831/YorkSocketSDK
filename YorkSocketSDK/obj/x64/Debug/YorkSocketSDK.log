@@ -1,0 +1,8 @@
+﻿  Validating architecture
+  Validating sources
+  Copying sources remotely
+  Starting remote build
+  Compiling sources:
+  YorkSocketSDKSample.cpp
+  Linking objects
+  YorkSocketSDK.vcxproj -> c:\Users\York\documents\visual studio 2015\Projects\YorkSocketSDK\YorkSocketSDK\bin\x64\Debug\YorkSocketSDK.out
