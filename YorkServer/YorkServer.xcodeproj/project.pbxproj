@@ -1,0 +1,259 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		06AC16351DE5705900421FF8 /* YorkNetwork.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06AC16301DE5705900421FF8 /* YorkNetwork.cpp */; };
+		06AC16361DE5705900421FF8 /* YorkSocketSDKSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06AC16321DE5705900421FF8 /* YorkSocketSDKSample.cpp */; };
+		06AC16371DE5705900421FF8 /* YorkSocketServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06AC16331DE5705900421FF8 /* YorkSocketServer.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		06AC15E51DE56F1500421FF8 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		06AC15E71DE56F1500421FF8 /* YorkServer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = YorkServer; sourceTree = BUILT_PRODUCTS_DIR; };
+		06AC16301DE5705900421FF8 /* YorkNetwork.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = YorkNetwork.cpp; path = ../../YorkNetWork/YorkNetwork.cpp; sourceTree = "<group>"; };
+		06AC16311DE5705900421FF8 /* YorkNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YorkNetwork.h; path = ../../YorkNetWork/YorkNetwork.h; sourceTree = "<group>"; };
+		06AC16321DE5705900421FF8 /* YorkSocketSDKSample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = YorkSocketSDKSample.cpp; path = ../../YorkNetWork/YorkSocketSDKSample.cpp; sourceTree = "<group>"; };
+		06AC16331DE5705900421FF8 /* YorkSocketServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = YorkSocketServer.cpp; path = ../../YorkNetWork/YorkSocketServer.cpp; sourceTree = "<group>"; };
+		06AC16341DE5705900421FF8 /* YorkSocketServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YorkSocketServer.h; path = ../../YorkNetWork/YorkSocketServer.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		06AC15E41DE56F1500421FF8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		06AC15DE1DE56F1500421FF8 = {
+			isa = PBXGroup;
+			children = (
+				06AC15E91DE56F1500421FF8 /* YorkServer */,
+				06AC15E81DE56F1500421FF8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		06AC15E81DE56F1500421FF8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				06AC15E71DE56F1500421FF8 /* YorkServer */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		06AC15E91DE56F1500421FF8 /* YorkServer */ = {
+			isa = PBXGroup;
+			children = (
+				06AC16301DE5705900421FF8 /* YorkNetwork.cpp */,
+				06AC16311DE5705900421FF8 /* YorkNetwork.h */,
+				06AC16321DE5705900421FF8 /* YorkSocketSDKSample.cpp */,
+				06AC16331DE5705900421FF8 /* YorkSocketServer.cpp */,
+				06AC16341DE5705900421FF8 /* YorkSocketServer.h */,
+			);
+			path = YorkServer;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		06AC15E61DE56F1500421FF8 /* YorkServer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 06AC15EE1DE56F1500421FF8 /* Build configuration list for PBXNativeTarget "YorkServer" */;
+			buildPhases = (
+				06AC15E31DE56F1500421FF8 /* Sources */,
+				06AC15E41DE56F1500421FF8 /* Frameworks */,
+				06AC15E51DE56F1500421FF8 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = YorkServer;
+			productName = YorkServer;
+			productReference = 06AC15E71DE56F1500421FF8 /* YorkServer */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		06AC15DF1DE56F1500421FF8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = Zero;
+				TargetAttributes = {
+					06AC15E61DE56F1500421FF8 = {
+						CreatedOnToolsVersion = 7.3.1;
+					};
+				};
+			};
+			buildConfigurationList = 06AC15E21DE56F1500421FF8 /* Build configuration list for PBXProject "YorkServer" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 06AC15DE1DE56F1500421FF8;
+			productRefGroup = 06AC15E81DE56F1500421FF8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				06AC15E61DE56F1500421FF8 /* YorkServer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		06AC15E31DE56F1500421FF8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				06AC16361DE5705900421FF8 /* YorkSocketSDKSample.cpp in Sources */,
+				06AC16351DE5705900421FF8 /* YorkNetwork.cpp in Sources */,
+				06AC16371DE5705900421FF8 /* YorkSocketServer.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		06AC15EC1DE56F1500421FF8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		06AC15ED1DE56F1500421FF8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		06AC15EF1DE56F1500421FF8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		06AC15F01DE56F1500421FF8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		06AC15E21DE56F1500421FF8 /* Build configuration list for PBXProject "YorkServer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				06AC15EC1DE56F1500421FF8 /* Debug */,
+				06AC15ED1DE56F1500421FF8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		06AC15EE1DE56F1500421FF8 /* Build configuration list for PBXNativeTarget "YorkServer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				06AC15EF1DE56F1500421FF8 /* Debug */,
+				06AC15F01DE56F1500421FF8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 06AC15DF1DE56F1500421FF8 /* Project object */;
+}
