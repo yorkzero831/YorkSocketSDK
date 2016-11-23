@@ -8,6 +8,8 @@
 #ifndef YORKNETWORK_H_
 #define YORKNETWORK_H_
 
+#define DEFULT_PORT 10833
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -24,6 +26,7 @@
 #include <fcntl.h>
 
 #include <thread>
+
 
 //using namespace::std;
 
@@ -52,6 +55,9 @@ namespace YorkNet {
 			}
 		};
 		void ShowErrorMessage(ErrorMessage message);
+        
+        char endOfStream = EOF;
+        
 	};
 
 } 

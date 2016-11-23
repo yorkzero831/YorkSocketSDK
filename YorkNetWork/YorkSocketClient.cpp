@@ -7,7 +7,7 @@
 
 #include "YorkSocketClient.h"
 
-#define MAX_BUFFER_SIZE 2048
+#define MAX_BUFFER_SIZE 512
 
 namespace YorkNet {
 
@@ -87,12 +87,12 @@ namespace YorkNet {
     void YorkSocketClient::writeToServer(std::string message)
     {
         int error;
-        message += "\n";
-        int sentSize = message.size();
-        char sentChar[sentSize];
+        unsigned long sentSize = message.size();
+        char sentChar[sentSize + 1];
+        sentChar[sentSize] = endOfStream;
         
         strcpy(sentChar, message.c_str());
-        if (error = write(sockID,sentChar,sentSize) < 0)
+        if ((error = write(sockID,sentChar,sentSize) < 0))
         {
             std::cout<< "Error sent" << std::endl;
         }
@@ -121,7 +121,7 @@ namespace YorkNet {
                 }
                 
                 
-                if (buf_Pointer > 0 && '\n' == thisBuf[buf_Pointer])
+                if (buf_Pointer > 0 && endOfStream == thisBuf[buf_Pointer])
                 {
                     std::cout << " Received:" << thisBuf << std::endl;
                     break;

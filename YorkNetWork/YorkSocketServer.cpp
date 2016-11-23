@@ -20,7 +20,7 @@ namespace YorkNet {
 	}
 	
 
-	void YorkSocketServer::StartServer(int portNum)
+	void YorkSocketServer::StartServer(int portNum )
 	{
 		clients = std::map<std::string, int>();
 		if ((listenSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
@@ -122,7 +122,7 @@ namespace YorkNet {
                 std::cout << "Input ClientID" << std::endl;
                 int id = 0;
                 std::cin >> id;
-                SentFileTo(id, "/Users/coly30/YorkNetworkKit/YorkServer/YorkServer/1.json");
+                SentFileTo(id, "./file/1.txt");
             }
         }
     }
@@ -149,7 +149,7 @@ namespace YorkNet {
                 clients.insert(std::pair<std::string, int>(ctrr, clientSocket));
 				if (!fork())
 				{
-					SentMessageTo(clientSocket, "You are In!!/n");
+					SentMessageTo(clientSocket, "You are In!!");
 					exit(0);
 				}
 			}
@@ -194,7 +194,7 @@ namespace YorkNet {
 					}
 
 
-					if (buf_Pointer > 0 && '\n' == thisBuf[buf_Pointer])
+					if (buf_Pointer > 0 && endOfStream == thisBuf[buf_Pointer])
 					{
 						std::cout << it->first << " Received:" << thisBuf << std::endl;
 						DidRecivedMessage(it->second, it->first);
@@ -228,9 +228,10 @@ namespace YorkNet {
 
 	void YorkSocketServer::SentMessageTo(int socketID, std::string words)
 	{
-        words += "\n";
-		int sentSize = words.size();
-		char sentChar[sentSize];
+		unsigned long sentSize = words.size();
+		char sentChar[sentSize + 1];
+        sentChar[sentSize] = endOfStream;
+        
 		strcpy(sentChar, words.c_str());
 		if (send(socketID, sentChar, sentSize, 0) == -1) {
 			perror("Send error！");
@@ -251,9 +252,10 @@ namespace YorkNet {
 	{
         std::vector<std::string> needToDelete =  std::vector<std::string>();
         
-        words += "\n";
-		int sentSize = words.size();
-		char sentChar[sentSize];
+        unsigned long sentSize = words.size();
+        char sentChar[sentSize + 1];
+        sentChar[sentSize] = endOfStream;
+        
 		strcpy(sentChar, words.c_str());
 
         std::map<std::string, int>::iterator it;
@@ -302,7 +304,7 @@ namespace YorkNet {
             
             bzero(buffer, FILE_BUFFER_SIZE);
         }
-        SentMessageTo(socketID, "\n");
+        SentMessageTo(socketID, "");
         
         fclose(fileR);
         std::cout << "File: "<< filePath<<"transfer finished"  << std::endl;

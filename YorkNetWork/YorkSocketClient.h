@@ -18,7 +18,7 @@ namespace YorkNet {
 	public:
 		YorkSocketClient();
 		virtual ~YorkSocketClient();
-        void connectTo(std::string ip, int port);
+        void connectTo(std::string ip, int port = DEFULT_PORT);
         void writeToServer(std::string message);
         
     private:

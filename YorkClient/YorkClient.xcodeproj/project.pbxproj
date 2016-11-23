@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		06AC163D1DE5707600421FF8 /* YorkNetwork.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06AC16381DE5707600421FF8 /* YorkNetwork.cpp */; };
-		06AC163E1DE5707600421FF8 /* YorkSocketClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06AC163A1DE5707600421FF8 /* YorkSocketClient.cpp */; };
-		06AC163F1DE5707600421FF8 /* YorkSocketSDKClientSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06AC163C1DE5707600421FF8 /* YorkSocketSDKClientSample.cpp */; };
+		DB37C79D1DE5DC4400131817 /* YorkNetwork.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB37C7981DE5DC4400131817 /* YorkNetwork.cpp */; };
+		DB37C79E1DE5DC4400131817 /* YorkSocketClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB37C79A1DE5DC4400131817 /* YorkSocketClient.cpp */; };
+		DB37C79F1DE5DC4400131817 /* YorkSocketSDKClientSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB37C79C1DE5DC4400131817 /* YorkSocketSDKClientSample.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		06AC16141DE56F8700421FF8 /* CopyFiles */ = {
+		DB37C78C1DE5DC2D00131817 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
@@ -25,16 +25,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		06AC16161DE56F8700421FF8 /* YorkClient */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = YorkClient; sourceTree = BUILT_PRODUCTS_DIR; };
-		06AC16381DE5707600421FF8 /* YorkNetwork.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = YorkNetwork.cpp; path = ../../YorkNetWork/YorkNetwork.cpp; sourceTree = "<group>"; };
-		06AC16391DE5707600421FF8 /* YorkNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YorkNetwork.h; path = ../../YorkNetWork/YorkNetwork.h; sourceTree = "<group>"; };
-		06AC163A1DE5707600421FF8 /* YorkSocketClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = YorkSocketClient.cpp; path = ../../YorkNetWork/YorkSocketClient.cpp; sourceTree = "<group>"; };
-		06AC163B1DE5707600421FF8 /* YorkSocketClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YorkSocketClient.h; path = ../../YorkNetWork/YorkSocketClient.h; sourceTree = "<group>"; };
-		06AC163C1DE5707600421FF8 /* YorkSocketSDKClientSample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = YorkSocketSDKClientSample.cpp; path = ../../YorkNetWork/YorkSocketSDKClientSample.cpp; sourceTree = "<group>"; };
+		DB37C78E1DE5DC2D00131817 /* YorkClient */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = YorkClient; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB37C7981DE5DC4400131817 /* YorkNetwork.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = YorkNetwork.cpp; path = ../../YorkNetWork/YorkNetwork.cpp; sourceTree = "<group>"; };
+		DB37C7991DE5DC4400131817 /* YorkNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YorkNetwork.h; path = ../../YorkNetWork/YorkNetwork.h; sourceTree = "<group>"; };
+		DB37C79A1DE5DC4400131817 /* YorkSocketClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = YorkSocketClient.cpp; path = ../../YorkNetWork/YorkSocketClient.cpp; sourceTree = "<group>"; };
+		DB37C79B1DE5DC4400131817 /* YorkSocketClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YorkSocketClient.h; path = ../../YorkNetWork/YorkSocketClient.h; sourceTree = "<group>"; };
+		DB37C79C1DE5DC4400131817 /* YorkSocketSDKClientSample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = YorkSocketSDKClientSample.cpp; path = ../../YorkNetWork/YorkSocketSDKClientSample.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		06AC16131DE56F8700421FF8 /* Frameworks */ = {
+		DB37C78B1DE5DC2D00131817 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -44,30 +44,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		06AC160D1DE56F8600421FF8 = {
+		DB37C7851DE5DC2D00131817 = {
 			isa = PBXGroup;
 			children = (
-				06AC16181DE56F8700421FF8 /* YorkClient */,
-				06AC16171DE56F8700421FF8 /* Products */,
+				DB37C7901DE5DC2D00131817 /* YorkClient */,
+				DB37C78F1DE5DC2D00131817 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		06AC16171DE56F8700421FF8 /* Products */ = {
+		DB37C78F1DE5DC2D00131817 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				06AC16161DE56F8700421FF8 /* YorkClient */,
+				DB37C78E1DE5DC2D00131817 /* YorkClient */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		06AC16181DE56F8700421FF8 /* YorkClient */ = {
+		DB37C7901DE5DC2D00131817 /* YorkClient */ = {
 			isa = PBXGroup;
 			children = (
-				06AC16381DE5707600421FF8 /* YorkNetwork.cpp */,
-				06AC16391DE5707600421FF8 /* YorkNetwork.h */,
-				06AC163A1DE5707600421FF8 /* YorkSocketClient.cpp */,
-				06AC163B1DE5707600421FF8 /* YorkSocketClient.h */,
-				06AC163C1DE5707600421FF8 /* YorkSocketSDKClientSample.cpp */,
+				DB37C7981DE5DC4400131817 /* YorkNetwork.cpp */,
+				DB37C7991DE5DC4400131817 /* YorkNetwork.h */,
+				DB37C79A1DE5DC4400131817 /* YorkSocketClient.cpp */,
+				DB37C79B1DE5DC4400131817 /* YorkSocketClient.h */,
+				DB37C79C1DE5DC4400131817 /* YorkSocketSDKClientSample.cpp */,
 			);
 			path = YorkClient;
 			sourceTree = "<group>";
@@ -75,13 +75,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		06AC16151DE56F8700421FF8 /* YorkClient */ = {
+		DB37C78D1DE5DC2D00131817 /* YorkClient */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 06AC161D1DE56F8700421FF8 /* Build configuration list for PBXNativeTarget "YorkClient" */;
+			buildConfigurationList = DB37C7951DE5DC2D00131817 /* Build configuration list for PBXNativeTarget "YorkClient" */;
 			buildPhases = (
-				06AC16121DE56F8700421FF8 /* Sources */,
-				06AC16131DE56F8700421FF8 /* Frameworks */,
-				06AC16141DE56F8700421FF8 /* CopyFiles */,
+				DB37C78A1DE5DC2D00131817 /* Sources */,
+				DB37C78B1DE5DC2D00131817 /* Frameworks */,
+				DB37C78C1DE5DC2D00131817 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -89,55 +89,56 @@
 			);
 			name = YorkClient;
 			productName = YorkClient;
-			productReference = 06AC16161DE56F8700421FF8 /* YorkClient */;
+			productReference = DB37C78E1DE5DC2D00131817 /* YorkClient */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		06AC160E1DE56F8600421FF8 /* Project object */ = {
+		DB37C7861DE5DC2D00131817 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = Zero;
 				TargetAttributes = {
-					06AC16151DE56F8700421FF8 = {
-						CreatedOnToolsVersion = 7.3.1;
+					DB37C78D1DE5DC2D00131817 = {
+						CreatedOnToolsVersion = 8.0;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
-			buildConfigurationList = 06AC16111DE56F8600421FF8 /* Build configuration list for PBXProject "YorkClient" */;
+			buildConfigurationList = DB37C7891DE5DC2D00131817 /* Build configuration list for PBXProject "YorkClient" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 06AC160D1DE56F8600421FF8;
-			productRefGroup = 06AC16171DE56F8700421FF8 /* Products */;
+			mainGroup = DB37C7851DE5DC2D00131817;
+			productRefGroup = DB37C78F1DE5DC2D00131817 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				06AC16151DE56F8700421FF8 /* YorkClient */,
+				DB37C78D1DE5DC2D00131817 /* YorkClient */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		06AC16121DE56F8700421FF8 /* Sources */ = {
+		DB37C78A1DE5DC2D00131817 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				06AC163E1DE5707600421FF8 /* YorkSocketClient.cpp in Sources */,
-				06AC163F1DE5707600421FF8 /* YorkSocketSDKClientSample.cpp in Sources */,
-				06AC163D1DE5707600421FF8 /* YorkNetwork.cpp in Sources */,
+				DB37C79E1DE5DC4400131817 /* YorkSocketClient.cpp in Sources */,
+				DB37C79F1DE5DC4400131817 /* YorkSocketSDKClientSample.cpp in Sources */,
+				DB37C79D1DE5DC4400131817 /* YorkNetwork.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		06AC161B1DE56F8700421FF8 /* Debug */ = {
+		DB37C7931DE5DC2D00131817 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -149,10 +150,13 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -181,7 +185,7 @@
 			};
 			name = Debug;
 		};
-		06AC161C1DE56F8700421FF8 /* Release */ = {
+		DB37C7941DE5DC2D00131817 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -193,10 +197,13 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -218,14 +225,14 @@
 			};
 			name = Release;
 		};
-		06AC161E1DE56F8700421FF8 /* Debug */ = {
+		DB37C7961DE5DC2D00131817 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
-		06AC161F1DE56F8700421FF8 /* Release */ = {
+		DB37C7971DE5DC2D00131817 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -235,24 +242,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		06AC16111DE56F8600421FF8 /* Build configuration list for PBXProject "YorkClient" */ = {
+		DB37C7891DE5DC2D00131817 /* Build configuration list for PBXProject "YorkClient" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				06AC161B1DE56F8700421FF8 /* Debug */,
-				06AC161C1DE56F8700421FF8 /* Release */,
+				DB37C7931DE5DC2D00131817 /* Debug */,
+				DB37C7941DE5DC2D00131817 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		06AC161D1DE56F8700421FF8 /* Build configuration list for PBXNativeTarget "YorkClient" */ = {
+		DB37C7951DE5DC2D00131817 /* Build configuration list for PBXNativeTarget "YorkClient" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				06AC161E1DE56F8700421FF8 /* Debug */,
-				06AC161F1DE56F8700421FF8 /* Release */,
+				DB37C7961DE5DC2D00131817 /* Debug */,
+				DB37C7971DE5DC2D00131817 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 06AC160E1DE56F8600421FF8 /* Project object */;
+	rootObject = DB37C7861DE5DC2D00131817 /* Project object */;
 }

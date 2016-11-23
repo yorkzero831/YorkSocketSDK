@@ -25,7 +25,7 @@ namespace YorkNet {
 		YorkSocketServer();
 		~YorkSocketServer();
 
-		void StartServer(int portNum);
+		void StartServer(int portNum = DEFULT_PORT);
 		void StopServer();
 		void SentMessageTo(int socketID, std::string words);
 		void SentMessageToALL(std::string words);

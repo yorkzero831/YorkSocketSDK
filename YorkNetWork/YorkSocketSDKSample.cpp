@@ -15,7 +15,7 @@ using namespace YorkNet;
 int main() {
 
 	YorkSocketServer myserver;
-	myserver.StartServer(10832);
+	myserver.StartServer();
 
 	cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
 	return 0;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0730"
+   LastUpgradeVersion = "0800"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "06AC16151DE56F8700421FF8"
+               BlueprintIdentifier = "DB37C78D1DE5DC2D00131817"
                BuildableName = "YorkClient"
                BlueprintName = "YorkClient"
                ReferencedContainer = "container:YorkClient.xcodeproj">
@@ -32,7 +32,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "06AC16151DE56F8700421FF8"
+            BlueprintIdentifier = "DB37C78D1DE5DC2D00131817"
             BuildableName = "YorkClient"
             BlueprintName = "YorkClient"
             ReferencedContainer = "container:YorkClient.xcodeproj">
@@ -55,7 +55,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "06AC16151DE56F8700421FF8"
+            BlueprintIdentifier = "DB37C78D1DE5DC2D00131817"
             BuildableName = "YorkClient"
             BlueprintName = "YorkClient"
             ReferencedContainer = "container:YorkClient.xcodeproj">
@@ -74,7 +74,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "06AC16151DE56F8700421FF8"
+            BlueprintIdentifier = "DB37C78D1DE5DC2D00131817"
             BuildableName = "YorkClient"
             BlueprintName = "YorkClient"
             ReferencedContainer = "container:YorkClient.xcodeproj">

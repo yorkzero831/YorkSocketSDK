@@ -10,17 +10,22 @@
 		06AC16351DE5705900421FF8 /* YorkNetwork.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06AC16301DE5705900421FF8 /* YorkNetwork.cpp */; };
 		06AC16361DE5705900421FF8 /* YorkSocketSDKSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06AC16321DE5705900421FF8 /* YorkSocketSDKSample.cpp */; };
 		06AC16371DE5705900421FF8 /* YorkSocketServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06AC16331DE5705900421FF8 /* YorkSocketServer.cpp */; };
+		DB37C7A11DE5DD8900131817 /* 1.txt in Copy Files */ = {isa = PBXBuildFile; fileRef = DB37C7A01DE5DD8900131817 /* 1.txt */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		DB37C7A31DE5DD9D00131817 /* 1.json in Copy Files */ = {isa = PBXBuildFile; fileRef = DB37C7A21DE5DD9D00131817 /* 1.json */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		06AC15E51DE56F1500421FF8 /* CopyFiles */ = {
+		06AC15E51DE56F1500421FF8 /* Copy Files */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			buildActionMask = 12;
+			dstPath = file;
+			dstSubfolderSpec = 16;
 			files = (
+				DB37C7A31DE5DD9D00131817 /* 1.json in Copy Files */,
+				DB37C7A11DE5DD8900131817 /* 1.txt in Copy Files */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			name = "Copy Files";
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -31,6 +36,8 @@
 		06AC16321DE5705900421FF8 /* YorkSocketSDKSample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = YorkSocketSDKSample.cpp; path = ../../YorkNetWork/YorkSocketSDKSample.cpp; sourceTree = "<group>"; };
 		06AC16331DE5705900421FF8 /* YorkSocketServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = YorkSocketServer.cpp; path = ../../YorkNetWork/YorkSocketServer.cpp; sourceTree = "<group>"; };
 		06AC16341DE5705900421FF8 /* YorkSocketServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YorkSocketServer.h; path = ../../YorkNetWork/YorkSocketServer.h; sourceTree = "<group>"; };
+		DB37C7A01DE5DD8900131817 /* 1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = 1.txt; path = YorkServer/1.txt; sourceTree = "<group>"; };
+		DB37C7A21DE5DD9D00131817 /* 1.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = 1.json; path = YorkServer/1.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +54,8 @@
 		06AC15DE1DE56F1500421FF8 = {
 			isa = PBXGroup;
 			children = (
+				DB37C7A21DE5DD9D00131817 /* 1.json */,
+				DB37C7A01DE5DD8900131817 /* 1.txt */,
 				06AC15E91DE56F1500421FF8 /* YorkServer */,
 				06AC15E81DE56F1500421FF8 /* Products */,
 			);
@@ -81,7 +90,7 @@
 			buildPhases = (
 				06AC15E31DE56F1500421FF8 /* Sources */,
 				06AC15E41DE56F1500421FF8 /* Frameworks */,
-				06AC15E51DE56F1500421FF8 /* CopyFiles */,
+				06AC15E51DE56F1500421FF8 /* Copy Files */,
 			);
 			buildRules = (
 			);
@@ -221,6 +230,7 @@
 		06AC15EF1DE56F1500421FF8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -228,6 +238,7 @@
 		06AC15F01DE56F1500421FF8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
