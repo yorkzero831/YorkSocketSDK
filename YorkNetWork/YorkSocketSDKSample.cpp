@@ -14,8 +14,8 @@ using namespace YorkNet;
 
 int main() {
     
-    char a[] = "00000005";
-    int aa = YorkNetwork::charToInt(a);
+    std::string a = "./file/1.txt";
+    int aa = YorkNetwork::getFileSize(a);
 	YorkSocketServer myserver;
 	myserver.StartServer();
 

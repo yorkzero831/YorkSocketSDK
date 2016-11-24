@@ -8,9 +8,10 @@
 #ifndef YORKNETWORK_H_
 #define YORKNETWORK_H_
 
-#define DEFULT_PORT 10833
-#define  MAX_BUFFER_SIZE 1024
-#define HEADER_LENGTH 24
+#define DEFULT_PORT 10832
+#define  MAX_BUFFER_SIZE 2048
+#define HEADER_LENGTH 48
+#define FILE_BUFFER_SIZE 2000
 
 #define LOOP(n) for(int ii = 0; ii < n; ++ ii)
 #define DISLOOP(n) for(int ii =n-1; ii >= 0; -- ii)
@@ -64,8 +65,9 @@ namespace YorkNet {
         
         char endOfStream = '\0';
         
-        static char* createBuffer(char *preBuffer, int tag, int numOfBlock = 1);
-        static char* createBuffer(std::string message, int tag , int numOfBlock = 1);
+        static char* createBuffer(char *preBuffer, int tag, int numOfBlock = 1, int indexOfBlock = 1);
+        static char* createBuffer(std::string message, int tag , int numOfBlock = 1, int indexOfBlock = 1);
+        static size_t getFileSize(const std::string& fileName);
         
 //    private:
         static char* intToChar(const int input, int length = 0);

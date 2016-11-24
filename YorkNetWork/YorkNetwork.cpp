@@ -24,7 +24,7 @@ namespace YorkNet {
 		std::cout << message.errorWords << " WITH ERROMESSAGE : " << message.details<<std::endl;
 	}
     
-    char* YorkNetwork::createBuffer(char *preBuffer, int tag, int numOfBlock)
+    char* YorkNetwork::createBuffer(char *preBuffer, int tag, int numOfBlock, int indexOfBlock)
     {
         char *out = new char[MAX_BUFFER_SIZE];
         unsigned long length = strlen(preBuffer);
@@ -36,17 +36,21 @@ namespace YorkNet {
         }
 
         // create part of how much words does content have
-        char *lengthChar = YorkNetwork::intToChar((int)length, 8);
+        char *lengthChar        = YorkNetwork::intToChar((int)length, 8);
         
         // create part of tag
-        char *tagChar    = YorkNetwork::intToChar(tag, 8);
+        char *tagChar           = YorkNetwork::intToChar(tag, 8);
         
         // create part of numOfBlock
         char *numOfBlockCHar    = YorkNetwork::intToChar(numOfBlock, 8);
         
+        // create part of indexOfBlock
+        char *indexOfBlockChar  = YorkNetwork::intToChar(indexOfBlock, 8);
+        
+        
         char *pointer = out;
         
-        // HeaderLenth =  tag + numOfBlock + length
+        // HeaderLenth =  tag*8 + numOfBlock*8 + indexOfBlock*8 + length*8 + Unuse*16
         LOOP(8)
         {
             *pointer = tagChar[ii];
@@ -61,7 +65,19 @@ namespace YorkNet {
         
         LOOP(8)
         {
+            *pointer = indexOfBlockChar[ii];
+            pointer++;
+        }
+        
+        LOOP(8)
+        {
             *pointer = lengthChar[ii];
+            pointer++;
+        }
+        
+        LOOP(16)
+        {
+            *pointer = ' ';
             pointer++;
         }
         
@@ -76,7 +92,7 @@ namespace YorkNet {
         return out;
     }
     
-    char* YorkNetwork::createBuffer(std::string message, int tag, int numOfBlock)
+    char* YorkNetwork::createBuffer(std::string message, int tag, int numOfBlock, int indexOfBlock)
     {
         char *out = new char[MAX_BUFFER_SIZE];
         
@@ -97,9 +113,12 @@ namespace YorkNet {
         // create part of numOfBlock
         char *numOfBlockCHar    = YorkNetwork::intToChar(numOfBlock, 8);
         
+        // create part of indexOfBlock
+        char *indexOfBlockChar  = YorkNetwork::intToChar(indexOfBlock, 8);
+        
         char *pointer = out;
         
-        // HeaderLenth =  tag + numOfBlock + length
+        // HeaderLenth =  tag*8 + numOfBlock*8 + indexOfBlock*8 + length*8 + Unuse*16
         LOOP(8)
         {
             *pointer = tagChar[ii];
@@ -114,9 +133,22 @@ namespace YorkNet {
         
         LOOP(8)
         {
+            *pointer = indexOfBlockChar[ii];
+            pointer++;
+        }
+        
+        LOOP(8)
+        {
             *pointer = lengthChar[ii];
             pointer++;
         }
+        
+        LOOP(16)
+        {
+            *pointer = ' ';
+            pointer++;
+        }
+        
         
         LOOP(length)
         {
@@ -206,6 +238,15 @@ namespace YorkNet {
         return outNum;
         
         
+    }
+    
+    size_t YorkNetwork::getFileSize(const std::string& fileName)
+    {
+        struct stat st;
+        if(stat(fileName.c_str(), &st) != 0) {
+            return 0;
+        }
+        return st.st_size;
     }
 
 } /* namespace York */

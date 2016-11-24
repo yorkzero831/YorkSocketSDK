@@ -106,7 +106,8 @@ namespace YorkNet {
             bool isChecked_tag = false;
             bool isChecked_blockNum = false;
             bool isChecked_length = false;
-            int tag,blockNum,contentlength = 0;
+            bool isChecked_indexBlock = false;
+            int tag,blockNum,indexBlock,contentlength = 0;
             
             size_t buf_Pointer = 0;
             char thisBuf[MAX_BUFFER_SIZE] = { 0 };
@@ -134,44 +135,35 @@ namespace YorkNet {
 //                    break;
 //                }
                 
-                if(!isChecked_tag)
+                if(buf_Pointer == (HEADER_LENGTH -1))
                 {
-                    if(buf_Pointer == 7)
+                    tag = YorkNetwork::charToInt(thisBuf,0,8);
+                    if(tag>=0)
+                        isChecked_tag = true;
+                    
+                    blockNum = YorkNetwork::charToInt(thisBuf,8,16);
+                    if(blockNum>=0)
+                        isChecked_blockNum = true;
+                    
+                    indexBlock = YorkNetwork::charToInt(thisBuf,16,24);
+                    if(indexBlock>=0)
+                        isChecked_indexBlock = true;
+                    
+                    contentlength = YorkNetwork::charToInt(thisBuf,24,32);
+                    if(contentlength>=0)
                     {
-                        tag = YorkNetwork::charToInt(thisBuf);
-                        if(tag>=0)
-                            isChecked_tag = true;
+                        //std::cout<< contentlength << std::endl;
+                        contentBuff = new char[contentlength];
+                        isChecked_length = true;
                     }
+                    
                 }
                 
-                if(!isChecked_blockNum)
-                {
-                    if(buf_Pointer == 15)
-                    {
-                        blockNum = YorkNetwork::charToInt(thisBuf,8,16);
-                        if(blockNum>=0)
-                            isChecked_blockNum = true;
-                    }
-                }
                 
-                if(!isChecked_length)
+                if(isChecked_tag && isChecked_blockNum && isChecked_length && isChecked_indexBlock && buf_Pointer >=HEADER_LENGTH )
                 {
-                    if(buf_Pointer == 23)
-                    {
-                        contentlength = YorkNetwork::charToInt(thisBuf,16,24);
-                        if(contentlength>=0)
-                        {
-                            //std::cout<< contentlength << std::endl;
-                            contentBuff = new char[contentlength];
-                            isChecked_length = true;
-                        }
-                    }
-                }
-                
-                if(isChecked_tag && isChecked_blockNum && isChecked_length)
-                {
-                    contentBuff[buf_Pointer-24] = thisBuf[buf_Pointer];
-                    if((buf_Pointer-24 +1) == contentlength)
+                    contentBuff[buf_Pointer-HEADER_LENGTH] = thisBuf[buf_Pointer];
+                    if((buf_Pointer - HEADER_LENGTH +1) == contentlength)
                     {
                         std::cout << "Received:" << contentBuff << std::endl;
                         

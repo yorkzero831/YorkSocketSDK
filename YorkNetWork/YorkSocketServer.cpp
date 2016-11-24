@@ -4,7 +4,6 @@
  *  Created on: 2016年10月17日
  *      Author: yorkzero
  */
-#define FILE_BUFFER_SIZE 512
 #include "YorkSocketServer.h"
 
 
@@ -122,7 +121,7 @@ namespace YorkNet {
                 std::cout << "Input ClientID" << std::endl;
                 int id = 0;
                 std::cin >> id;
-                SentFileTo(id, "./file/1.txt");
+                SentFileTo(id, "./file/1.json");
             }
         }
     }
@@ -285,6 +284,13 @@ namespace YorkNet {
     {
         char buffer[FILE_BUFFER_SIZE];
         
+        // count fileBlock sent
+        size_t fileSize = YorkNetwork::getFileSize(filePath);
+        int fileBlockTotal = fileSize/FILE_BUFFER_SIZE;
+        if(fileSize%FILE_BUFFER_SIZE > 0)
+            fileBlockTotal++;
+        
+        
         FILE *fileR = fopen(filePath.c_str(), "r");
         if(fileR == NULL)
         {
@@ -292,20 +298,28 @@ namespace YorkNet {
             return;
         }
         
+        
+        int thisBlockNum = 0;
+        
         bzero(buffer, FILE_BUFFER_SIZE);
         int file_block_length = 0;
         while( (file_block_length = fread(buffer, sizeof(char), FILE_BUFFER_SIZE, fileR)) > 0)
         {
+            thisBlockNum ++;
+            
             std::cout << "file_block_length: " << file_block_length << std::endl;
             std::cout << "content: " << buffer << std::endl;
             
-            if(send(socketID, buffer, file_block_length, 0) < 0)
+            char *sentChar = YorkNetwork::createBuffer(buffer, 2, fileBlockTotal, thisBlockNum);
+            
+            if(send(socketID, sentChar, MAX_BUFFER_SIZE, 0) < 0)
             {
                 std::cout << "Error on sending file"  << std::endl;
                 break;
             }
             
             bzero(buffer, FILE_BUFFER_SIZE);
+            
         }
         SentMessageTo(socketID, "");
         
