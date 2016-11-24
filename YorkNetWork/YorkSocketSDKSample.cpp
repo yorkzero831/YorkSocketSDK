@@ -13,7 +13,9 @@ using namespace YorkNet;
 
 
 int main() {
-
+    
+    char a[] = "00000005";
+    int aa = YorkNetwork::charToInt(a);
 	YorkSocketServer myserver;
 	myserver.StartServer();
 

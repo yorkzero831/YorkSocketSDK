@@ -9,6 +9,11 @@
 #define YORKNETWORK_H_
 
 #define DEFULT_PORT 10833
+#define  MAX_BUFFER_SIZE 1024
+#define HEADER_LENGTH 24
+
+#define LOOP(n) for(int ii = 0; ii < n; ++ ii)
+#define DISLOOP(n) for(int ii =n-1; ii >= 0; -- ii)
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,6 +29,7 @@
 #include <netinet/in.h> 
 #include <netdb.h>  
 #include <fcntl.h>
+#include <math.h>
 
 #include <thread>
 
@@ -56,8 +62,15 @@ namespace YorkNet {
 		};
 		void ShowErrorMessage(ErrorMessage message);
         
-        char endOfStream = EOF;
+        char endOfStream = '\0';
         
+        static char* createBuffer(char *preBuffer, int tag, int numOfBlock = 1);
+        static char* createBuffer(std::string message, int tag , int numOfBlock = 1);
+        
+//    private:
+        static char* intToChar(const int input, int length = 0);
+        static int charToInt(const char* input);
+        static int charToInt(const char* input, int beginP, int endP);
 	};
 
 } 

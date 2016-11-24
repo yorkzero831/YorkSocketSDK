@@ -8,7 +8,7 @@
 #ifndef YORKSOCKETSERVER_H_
 #define YORKSOCKETSERVER_H_
 
-#define  MAXBUFF 1024
+
 #define  MAXCLIENTNUM 10
 
 #include"YorkNetwork.h"
@@ -42,7 +42,7 @@ namespace YorkNet {
 		int listenSocket, clientSocket;
 		struct sockaddr_in remote_addr;
 		struct sockaddr_in server_addr;
-		char buf[MAXBUFF];
+		char buf[MAX_BUFFER_SIZE];
 		pthread_t clientThreadID[MAXCLIENTNUM];
 		std::map<std::string, int> clients;
 

@@ -100,10 +100,17 @@ namespace YorkNet {
     
     void YorkSocketClient::readFromServer()
     {
+
         while (1)
         {
+            bool isChecked_tag = false;
+            bool isChecked_blockNum = false;
+            bool isChecked_length = false;
+            int tag,blockNum,contentlength = 0;
+            
             size_t buf_Pointer = 0;
             char thisBuf[MAX_BUFFER_SIZE] = { 0 };
+            char *contentBuff = nullptr;
             while (buf_Pointer < MAX_BUFFER_SIZE)
             {
                 fcntl(sockID, F_SETFL,  O_NONBLOCK);
@@ -121,11 +128,58 @@ namespace YorkNet {
                 }
                 
                 
-                if (buf_Pointer > 0 && endOfStream == thisBuf[buf_Pointer])
+//                if (buf_Pointer > 0 && length == buf_Pointer)
+//                {
+//                    std::cout << " Received:" << thisBuf << std::endl;
+//                    break;
+//                }
+                
+                if(!isChecked_tag)
                 {
-                    std::cout << " Received:" << thisBuf << std::endl;
-                    break;
+                    if(buf_Pointer == 7)
+                    {
+                        tag = YorkNetwork::charToInt(thisBuf);
+                        if(tag>=0)
+                            isChecked_tag = true;
+                    }
                 }
+                
+                if(!isChecked_blockNum)
+                {
+                    if(buf_Pointer == 15)
+                    {
+                        blockNum = YorkNetwork::charToInt(thisBuf,8,16);
+                        if(blockNum>=0)
+                            isChecked_blockNum = true;
+                    }
+                }
+                
+                if(!isChecked_length)
+                {
+                    if(buf_Pointer == 23)
+                    {
+                        contentlength = YorkNetwork::charToInt(thisBuf,16,24);
+                        if(contentlength>=0)
+                        {
+                            //std::cout<< contentlength << std::endl;
+                            contentBuff = new char[contentlength];
+                            isChecked_length = true;
+                        }
+                    }
+                }
+                
+                if(isChecked_tag && isChecked_blockNum && isChecked_length)
+                {
+                    contentBuff[buf_Pointer-24] = thisBuf[buf_Pointer];
+                    if((buf_Pointer-24 +1) == contentlength)
+                    {
+                        std::cout << "Received:" << contentBuff << std::endl;
+                        
+                        break;
+                    }
+                }
+                
+                
                 
                 buf_Pointer++;
             }

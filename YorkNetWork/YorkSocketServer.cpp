@@ -173,8 +173,8 @@ namespace YorkNet {
                 int timeCount = 0;
 				int thisSocket = it->second;
 				size_t buf_Pointer = 0;
-				char thisBuf[MAXBUFF] = { 0 };
-				while (buf_Pointer < MAXBUFF)
+				char thisBuf[MAX_BUFFER_SIZE] = { 0 };
+				while (buf_Pointer < MAX_BUFFER_SIZE)
 				{
 					fcntl(thisSocket, F_SETFL,  O_NONBLOCK);
 					if (read(thisSocket, &thisBuf[buf_Pointer], 1) <= 0)
@@ -186,8 +186,9 @@ namespace YorkNet {
 						}
 						else
 						{
-							std::cout << it->first << "removed" << std::endl;
+							std::cout << it->first << " Removed" << std::endl;
 							clients.erase(it);
+                            close(it->second);
 							int count = clients.size();
 							break;
 						}
@@ -228,12 +229,13 @@ namespace YorkNet {
 
 	void YorkSocketServer::SentMessageTo(int socketID, std::string words)
 	{
-		unsigned long sentSize = words.size();
-		char sentChar[sentSize + 1];
-        sentChar[sentSize] = endOfStream;
+//		unsigned long sentSize = words.size();
+//		char sentChar[sentSize + 1];
+//        sentChar[sentSize] = endOfStream;
+        char *sentChar = YorkNetwork::createBuffer(words, 1);
         
-		strcpy(sentChar, words.c_str());
-		if (send(socketID, sentChar, sentSize, 0) == -1) {
+		//strcpy(sentChar, words.c_str());
+		if (send(socketID, sentChar, MAX_BUFFER_SIZE, 0) == -1) {
 			perror("Send error！");
             std::map<std::string, int>::iterator it;
             for (it = clients.begin(); it != clients.end(); it++)
@@ -294,7 +296,8 @@ namespace YorkNet {
         int file_block_length = 0;
         while( (file_block_length = fread(buffer, sizeof(char), FILE_BUFFER_SIZE, fileR)) > 0)
         {
-            std::cout << "file_block_length" << file_block_length << std::endl;
+            std::cout << "file_block_length: " << file_block_length << std::endl;
+            std::cout << "content: " << buffer << std::endl;
             
             if(send(socketID, buffer, file_block_length, 0) < 0)
             {
