@@ -60,7 +60,7 @@ namespace YorkNet {
         
         while (true)
         {
-           
+           std::this_thread::sleep_for(hearBeatC);
         }
         
     }
@@ -70,6 +70,8 @@ namespace YorkNet {
         std::cout<<"Input your command"<<std::endl;
         while (true)
         {
+            std::this_thread::sleep_for(hearBeatC);
+            
             std::string input = "";
             std::cin >> input;
             if(input == "sentMessage")
@@ -100,22 +102,63 @@ namespace YorkNet {
     
     void YorkSocketClient::readFromServer()
     {
-
         while (1)
         {
-            bool isChecked_tag = false;
-            bool isChecked_blockNum = false;
-            bool isChecked_length = false;
-            bool isChecked_indexBlock = false;
-            int tag,blockNum,indexBlock,contentlength = 0;
+            std::this_thread::sleep_for(hearBeatC);
             
-            size_t buf_Pointer = 0;
-            char thisBuf[MAX_BUFFER_SIZE] = { 0 };
-            char *contentBuff = nullptr;
-            while (buf_Pointer < MAX_BUFFER_SIZE)
+            bool isBegin_header                         = false;
+            bool isChecked_header                       = false;
+            bool isEndOfStream                          = false;
+            
+            Header thisHeader;
+            
+            long tag,blockNum,indexBlock,contentlength  = 0;
+            
+            size_t buf_Pointer                          = 0;
+            size_t buf_Context_Pointer                  = 0;
+            char headerBuff[HEADER_LENGTH]              = { 0 };
+            char *contextBuff                           = nullptr;
+            
+            if(!isChecked_header)
+            {
+                while (buf_Pointer < HEADER_LENGTH)
+                {
+                    std::this_thread::sleep_for(hearBeatC);
+                    fcntl(sockID, F_SETFL,  O_NONBLOCK);
+                    if (read(sockID, &headerBuff[buf_Pointer], 1) <= 0)
+                    {
+                        if (errno == EWOULDBLOCK)
+                        {
+                            //std::cout << "nothing" << std::endl;
+                            break;;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    if (buf_Pointer == HEADER_LENGTH-1)
+                    {
+                        //std::cout <<  " Received:" << headerBuff << std::endl;
+                        
+                        
+                        memcpy(&thisHeader, headerBuff, HEADER_LENGTH);
+                        if(thisHeader.tag!=0 && thisHeader.length >=0 && thisHeader.indexOfBlock>=0 && thisHeader.totalBlock >0)
+                        {
+                            if(thisHeader.totalBlock < thisHeader.indexOfBlock){break;}
+                            isChecked_header = true;
+                            contextBuff = new char[thisHeader.length];
+                        }
+                        break;
+                    }
+                    
+                    buf_Pointer++;
+                }
+            }
+            if(isChecked_header)
             {
                 fcntl(sockID, F_SETFL,  O_NONBLOCK);
-                if (read(sockID, &thisBuf[buf_Pointer], 1) <= 0)
+                if (read(sockID, &contextBuff[buf_Context_Pointer], thisHeader.length) <= 0)
                 {
                     if (errno == EWOULDBLOCK)
                     {
@@ -127,54 +170,9 @@ namespace YorkNet {
                         break;
                     }
                 }
-                
-                
-//                if (buf_Pointer > 0 && length == buf_Pointer)
-//                {
-//                    std::cout << " Received:" << thisBuf << std::endl;
-//                    break;
-//                }
-                
-                if(buf_Pointer == (HEADER_LENGTH -1))
-                {
-                    tag = YorkNetwork::charToInt(thisBuf,0,8);
-                    if(tag>=0)
-                        isChecked_tag = true;
-                    
-                    blockNum = YorkNetwork::charToInt(thisBuf,8,16);
-                    if(blockNum>=0)
-                        isChecked_blockNum = true;
-                    
-                    indexBlock = YorkNetwork::charToInt(thisBuf,16,24);
-                    if(indexBlock>=0)
-                        isChecked_indexBlock = true;
-                    
-                    contentlength = YorkNetwork::charToInt(thisBuf,24,32);
-                    if(contentlength>=0)
-                    {
-                        //std::cout<< contentlength << std::endl;
-                        contentBuff = new char[contentlength];
-                        isChecked_length = true;
-                    }
-                    
-                }
-                
-                
-                if(isChecked_tag && isChecked_blockNum && isChecked_length && isChecked_indexBlock && buf_Pointer >=HEADER_LENGTH )
-                {
-                    contentBuff[buf_Pointer-HEADER_LENGTH] = thisBuf[buf_Pointer];
-                    if((buf_Pointer - HEADER_LENGTH +1) == contentlength)
-                    {
-                        std::cout << "Received:" << contentBuff << std::endl;
-                        
-                        break;
-                    }
-                }
-                
-                
-                
-                buf_Pointer++;
+                std::cout <<  " Received:" << contextBuff << std::endl;
             }
+            
         }
         
 

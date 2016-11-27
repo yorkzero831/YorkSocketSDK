@@ -14,8 +14,17 @@ using namespace YorkNet;
 
 int main() {
     
-    std::string a = "./file/1.txt";
-    int aa = YorkNetwork::getFileSize(a);
+    char aa[] = "wwwsss";
+    char *bb  = YorkNetwork::createBuffer(aa, 1,1,1);
+    
+    char cc[38];
+    
+    LOOP(38)
+    {
+        cc[ii] = bb[ii];
+        std::cout<<bb[ii];
+    }
+    
 	YorkSocketServer myserver;
 	myserver.StartServer();
 

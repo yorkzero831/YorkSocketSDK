@@ -75,14 +75,17 @@ namespace YorkNet {
 		//runServer();
 		
         while (true) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
 		
 	}
     
     void YorkSocketServer::commandSystem()
     {
-        while (true)
-        {
+        //while (true)
+        //{
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        
             std::string input = "";
             std::cin >> input;
             if (input == "clientCount")
@@ -106,7 +109,7 @@ namespace YorkNet {
                 std::string mess = "";
                 std::cin >> mess;
                 
-                SentMessageTo(id, mess);
+                SentMessageTo(id, mess ,1);
             }
             else if (input == "sentMessageAll")
             {
@@ -114,16 +117,18 @@ namespace YorkNet {
                 std::string mess = "";
                 std::cin >> mess;
                 
-                SentMessageToALL(mess);
+                SentMessageToALL(mess ,1);
             }
             else if(input == "sentFile")
             {
                 std::cout << "Input ClientID" << std::endl;
                 int id = 0;
                 std::cin >> id;
-                SentFileTo(id, "./file/1.json");
+                SentFileTo(id, "./file/3.json");
             }
-        }
+            
+        commandSystem();
+        //}
     }
 
 
@@ -133,6 +138,8 @@ namespace YorkNet {
 		
 		while (1)
 		{
+            std::this_thread::sleep_for(hearBeatC);
+            
 			sin_size = sizeof(struct sockaddr_in);
 			if ((clientSocket = accept(listenSocket, (struct sockaddr*)&remote_addr, &sin_size)) < 0)
 			{
@@ -146,14 +153,13 @@ namespace YorkNet {
 				std::string ctrr(myN.str());
 				std::cout << "received a connection from " << ctrr << std::endl;
                 clients.insert(std::pair<std::string, int>(ctrr, clientSocket));
-				if (!fork())
+				//if (!fork())
 				{
-					SentMessageTo(clientSocket, "You are In!!");
-					exit(0);
+					SentMessageTo(clientSocket, "You are In!!",1);
+					//exit(0);
 				}
 			}
 			
-
 		}
 	}
 
@@ -161,6 +167,7 @@ namespace YorkNet {
 	{
 		while (1)
 		{
+            
 			if (clients.size() == 0)
 				continue;
             std::map<std::string, int>::iterator it;
@@ -208,9 +215,8 @@ namespace YorkNet {
                     break;
 
 			}
-
 		}
-		
+        
 	}
 
 
@@ -226,12 +232,12 @@ namespace YorkNet {
 
 	}
 
-	void YorkSocketServer::SentMessageTo(int socketID, std::string words)
+	void YorkSocketServer::SentMessageTo(int socketID, std::string words, int64_t tag, int64_t IOB, int64_t TOB)
 	{
 //		unsigned long sentSize = words.size();
 //		char sentChar[sentSize + 1];
 //        sentChar[sentSize] = endOfStream;
-        char *sentChar = YorkNetwork::createBuffer(words, 1);
+        char *sentChar = YorkNetwork::createBuffer(words, tag, TOB, IOB);
         
 		//strcpy(sentChar, words.c_str());
 		if (send(socketID, sentChar, MAX_BUFFER_SIZE, 0) == -1) {
@@ -249,7 +255,7 @@ namespace YorkNet {
 		//close(socketID);
 	}
 
-	void YorkSocketServer::SentMessageToALL(std::string words)
+	void YorkSocketServer::SentMessageToALL(std::string words, int64_t tag, int64_t IOB, int64_t TOB)
 	{
         std::vector<std::string> needToDelete =  std::vector<std::string>();
         
@@ -282,18 +288,24 @@ namespace YorkNet {
     
     void YorkSocketServer::SentFileTo(int socketID, std::string filePath)
     {
-        char buffer[FILE_BUFFER_SIZE];
+        
         
         // count fileBlock sent
         size_t fileSize = YorkNetwork::getFileSize(filePath);
-        int fileBlockTotal = fileSize/FILE_BUFFER_SIZE;
+        char buffer[fileSize];
+        
+        size_t fileBlockTotal = 1;//fileSize/FILE_BUFFER_SIZE;
         if(fileSize%FILE_BUFFER_SIZE > 0)
             fileBlockTotal++;
         
+        std::ifstream ins("./file/1.json",std::ifstream::binary);
+     
+        FILE *fileR ;
+        fileR = std::fopen(filePath.c_str(), "rb");
         
-        FILE *fileR = fopen(filePath.c_str(), "r");
         if(fileR == NULL)
         {
+            fclose(fileR);
             std::cout << "Can not OpenFile "<< filePath << std::endl;
             return;
         }
@@ -301,9 +313,9 @@ namespace YorkNet {
         
         int thisBlockNum = 0;
         
-        bzero(buffer, FILE_BUFFER_SIZE);
+        bzero(buffer, fileSize);
         int file_block_length = 0;
-        while( (file_block_length = fread(buffer, sizeof(char), FILE_BUFFER_SIZE, fileR)) > 0)
+        while( (file_block_length = fread(buffer, sizeof(char), fileSize, fileR)) > 0)
         {
             thisBlockNum ++;
             
@@ -312,16 +324,16 @@ namespace YorkNet {
             
             char *sentChar = YorkNetwork::createBuffer(buffer, 2, fileBlockTotal, thisBlockNum);
             
-            if(send(socketID, sentChar, MAX_BUFFER_SIZE, 0) < 0)
+            if(send(socketID, sentChar, fileSize, 0) < 0)
             {
                 std::cout << "Error on sending file"  << std::endl;
                 break;
             }
             
-            bzero(buffer, FILE_BUFFER_SIZE);
+            bzero(buffer, fileSize);
             
         }
-        SentMessageTo(socketID, "");
+        //SentMessageTo(socketID, "",1);
         
         fclose(fileR);
         std::cout << "File: "<< filePath<<"transfer finished"  << std::endl;

@@ -24,219 +24,78 @@ namespace YorkNet {
 		std::cout << message.errorWords << " WITH ERROMESSAGE : " << message.details<<std::endl;
 	}
     
-    char* YorkNetwork::createBuffer(char *preBuffer, int tag, int numOfBlock, int indexOfBlock)
+    char* YorkNetwork::createBuffer(char *preBuffer, int64_t tag, int64_t numOfBlock, int64_t indexOfBlock)
     {
-        char *out = new char[MAX_BUFFER_SIZE];
-        unsigned long length = strlen(preBuffer);
+        int64_t bufferLength    = strlen(preBuffer);
+        char *out               = new char[bufferLength + HEADER_LENGTH];
+        int64_t tagTrue         = tag==0?1:tag;
+        Header header           = Header(tagTrue, bufferLength, numOfBlock, indexOfBlock);
         
-        if(length > MAX_BUFFER_SIZE - HEADER_LENGTH)
-        {
-            std::cout << "Buffer size over ranger" << std::endl;
-            return out;
-        }
-
-        // create part of how much words does content have
-        char *lengthChar        = YorkNetwork::intToChar((int)length, 8);
-        
-        // create part of tag
-        char *tagChar           = YorkNetwork::intToChar(tag, 8);
-        
-        // create part of numOfBlock
-        char *numOfBlockCHar    = YorkNetwork::intToChar(numOfBlock, 8);
-        
-        // create part of indexOfBlock
-        char *indexOfBlockChar  = YorkNetwork::intToChar(indexOfBlock, 8);
-        
-        
-        char *pointer = out;
-        
-        // HeaderLenth =  tag*8 + numOfBlock*8 + indexOfBlock*8 + length*8 + Unuse*16
-        LOOP(8)
-        {
-            *pointer = tagChar[ii];
-            pointer++;
-        }
-        
-        LOOP(8)
-        {
-            *pointer = numOfBlockCHar[ii];
-            pointer++;
-        }
-        
-        LOOP(8)
-        {
-            *pointer = indexOfBlockChar[ii];
-            pointer++;
-        }
-        
-        LOOP(8)
-        {
-            *pointer = lengthChar[ii];
-            pointer++;
-        }
-        
-        LOOP(16)
-        {
-            *pointer = ' ';
-            pointer++;
-        }
-        
-        LOOP(length)
-        {
-            *pointer = preBuffer[ii];
-            pointer++;
-        }
- 
+        memcpy(out, &header, HEADER_LENGTH);
+        //int64_t ss = strlen(out);
+        strcpy(out + HEADER_LENGTH, preBuffer);
         
         
         return out;
     }
     
-    char* YorkNetwork::createBuffer(std::string message, int tag, int numOfBlock, int indexOfBlock)
+    char* YorkNetwork::createBuffer(std::string message, int64_t tag, int64_t numOfBlock, int64_t indexOfBlock)
     {
-        char *out = new char[MAX_BUFFER_SIZE];
-        
-        unsigned long length = message.length();
-        
-        if(length > MAX_BUFFER_SIZE - HEADER_LENGTH)
-        {
-            std::cout << "Buffer size over ranger" << std::endl;
-            return out;
-        }
-        
-        // create part of how much words does content have
-        char *lengthChar = YorkNetwork::intToChar((int)length, 8);
-        
-        // create part of tag
-        char *tagChar    = YorkNetwork::intToChar(tag, 8);
-        
-        // create part of numOfBlock
-        char *numOfBlockCHar    = YorkNetwork::intToChar(numOfBlock, 8);
-        
-        // create part of indexOfBlock
-        char *indexOfBlockChar  = YorkNetwork::intToChar(indexOfBlock, 8);
-        
-        char *pointer = out;
-        
-        // HeaderLenth =  tag*8 + numOfBlock*8 + indexOfBlock*8 + length*8 + Unuse*16
-        LOOP(8)
-        {
-            *pointer = tagChar[ii];
-            pointer++;
-        }
-        
-        LOOP(8)
-        {
-            *pointer = numOfBlockCHar[ii];
-            pointer++;
-        }
-        
-        LOOP(8)
-        {
-            *pointer = indexOfBlockChar[ii];
-            pointer++;
-        }
-        
-        LOOP(8)
-        {
-            *pointer = lengthChar[ii];
-            pointer++;
-        }
-        
-        LOOP(16)
-        {
-            *pointer = ' ';
-            pointer++;
-        }
+        int64_t bufferLength    = message.length();
+        char *out               = new char[bufferLength + HEADER_LENGTH];
+        int64_t tagTrue         = tag==0?1:tag;
+        Header header           = Header(tagTrue, bufferLength, numOfBlock, indexOfBlock);
         
         
-        LOOP(length)
-        {
-            *pointer = message.at(ii);
-            pointer++;
-        }
+        memcpy(out, &header, HEADER_LENGTH);
         
+        const char *messageToChar = message.c_str();
+        
+        strcpy(out + HEADER_LENGTH, messageToChar);
         
         
         return out;
 
     }
+
     
-    char* YorkNetwork::intToChar(const int input, int length)
+    char* YorkNetwork::intToChar(const int64_t input)
     {
+        char *outPut = new char[8];
+        memcpy(outPut, &input, 8);
         
-        char s[32];
-        int len = sprintf(s, "%d", input);
-        char *output;
-        
-        if(length != 0)
+        LOOP(8)
         {
-            if(length < len)
+            if(outPut[ii] == '\0')
             {
-                return output;
-            }
-            
-            output = new char[length];
-            int dist = length - len;
-            
-            LOOP(dist)
-            {
-                output[ii] = '0';
-            }
-            
-            for (int i = dist; i < length; i++)
-            {
-                output[i] = s[i-dist];
-            }
-            
-            
-        }
-        else
-        {
-            output = new char[len];
-            DISLOOP(len)
-            {
-                output[ii] = s[ii];
+                outPut[ii] = '\x02';
             }
         }
         
-        return output;
-        
-        
+        return outPut;
     }
     
-    int YorkNetwork::charToInt(const char *input)
+    int64_t YorkNetwork::charToInt(const char *input)
     {
-        unsigned long length = strlen(input);
-        int ruler = 1;
-        int outNum = 0;
-        DISLOOP((int)length)
-        {
-            int thisNum = input[ii] - '0';
-            outNum += ( thisNum * ruler );
-            ruler *= 10;
-        }
+        int64_t n = 0;
+        memcpy(&n, input, 8);
         
-        
-        return outNum;
+        return n;
     }
     
-    int YorkNetwork::charToInt(const char *input, int beginP, int endP)
+    int64_t YorkNetwork::charToInt(const char *input, int beginP, int endP)
     {
-        int length = endP - beginP;
-        
-        if(length < 0) return 0;
-        
-        int ruler = 1;
-        int outNum = 0;
-        for(int i = endP-1; i>= beginP; i--)
+        if( (endP - endP) != 8 )
+            return -1;
+        char tempChar[8];
+        LOOP(8)
         {
-            int thisNum = input[i] - '0';
-            outNum += ( thisNum * ruler );
-            ruler *= 10;
+            tempChar[ii] = input[ii + beginP];
         }
-        return outNum;
         
+        int64_t n = 0;
+        memcpy(&n, tempChar, 8);
+        return n;
         
     }
     
