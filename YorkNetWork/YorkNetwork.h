@@ -8,10 +8,10 @@
 #ifndef YORKNETWORK_H_
 #define YORKNETWORK_H_
 
-#define DEFULT_PORT         10832
-#define  MAX_BUFFER_SIZE    512
-#define HEADER_LENGTH       32
-#define FILE_BUFFER_SIZE    10000
+#define DEFULT_PORT         10833
+#define  MAX_BUFFER_SIZE    1000
+#define HEADER_LENGTH       40
+#define FILE_BUFFER_SIZE    1000
 
 
 
@@ -28,7 +28,7 @@
 #include <arpa/inet.h>
 #include <iostream>
 #include <sstream>
-#include <pthread.h>
+//#include <pthread.h>
 #include <netinet/in.h> 
 #include <netdb.h>  
 #include <fcntl.h>
@@ -56,6 +56,7 @@ namespace YorkNet {
 			CANNOTCREATESOCKT,
 			CANNOTACCETTCLIENT
 		};
+        
 		struct ErrorMessage
 		{
 			ErrorWord errorWords;
@@ -66,6 +67,31 @@ namespace YorkNet {
 				details		 = det;
 			}
 		};
+        
+        struct Header
+        {
+            int64_t begin;
+            int64_t tag;
+            int64_t length;
+            int64_t indexOfBlock;
+            int64_t totalBlock;
+            Header(const int64_t &Tag, const int64_t &Length, const int64_t &TB, const int64_t &IOB )
+            {
+                begin           = 10001;
+                tag             = Tag;
+                length          = Length;
+                indexOfBlock    = IOB;
+                totalBlock      = TB;
+            }
+            Header()
+            {
+                begin           = 10001;
+                tag             = -1;
+                length          = -1;
+                indexOfBlock    = -1;
+                totalBlock      = -1;
+            }
+        };
 		void ShowErrorMessage(ErrorMessage message);
         
         char endOfStream    = '\0';
@@ -76,7 +102,7 @@ namespace YorkNet {
         static char* createBuffer(std::string message, int64_t tag , int64_t numOfBlock = 1, int64_t indexOfBlock = 1);
         static size_t getFileSize(const std::string& fileName);
         
-        virtual void didGetMessage(const char *inMessage){};
+        virtual void didGetMessage(const char *inMessage,const Header &header){};
         
 //    private:
         
@@ -84,29 +110,11 @@ namespace YorkNet {
         static int64_t charToInt(const char* input);
         static int64_t charToInt(const char* input, int beginP, int endP);
         
+        static std::string getDirPath(std::string ins);
+        
 	};
     
-    struct Header
-    {
-        int64_t tag;
-        int64_t length;
-        int64_t indexOfBlock;
-        int64_t totalBlock;
-        Header(const int64_t &Tag, const int64_t &Length, const int64_t &TB, const int64_t &IOB )
-        {
-            tag             = Tag;
-            length          = Length;
-            indexOfBlock    = IOB;
-            totalBlock      = TB;
-        }
-        Header()
-        {
-            tag             = -1;
-            length          = -1;
-            indexOfBlock    = -1;
-            totalBlock      = -1;
-        }
-    };
+    
 
 } 
 

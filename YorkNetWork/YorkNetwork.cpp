@@ -107,5 +107,18 @@ namespace YorkNet {
         }
         return st.st_size;
     }
+    
+    std::string YorkNetwork::getDirPath(std::string ins)
+    {
+        std::string out;
+        char cwd[1024];
+        if (getcwd(cwd, sizeof(cwd)) != NULL)
+        {
+            out.append(cwd);
+            out += "/file/";
+            out += ins;
+        }
+        return out;
+    }
 
 } /* namespace York */

@@ -36,6 +36,9 @@ namespace YorkNet {
 		std::thread connectThread;
 		std::thread waitMesThread;
         std::thread cmdSysThread;
+        
+        std::mutex fileMutex;
+        
 		unsigned int clen;
 		int recvbytes;
 		socklen_t sin_size;
@@ -50,6 +53,8 @@ namespace YorkNet {
 		void runServer();
 		void waitingMessage();
         void commandSystem();
+        
+        
 		
 	};
 

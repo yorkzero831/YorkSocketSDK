@@ -12,7 +12,8 @@
 		06AC16371DE5705900421FF8 /* YorkSocketServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06AC16331DE5705900421FF8 /* YorkSocketServer.cpp */; };
 		DB37C7A11DE5DD8900131817 /* 1.txt in Copy Files */ = {isa = PBXBuildFile; fileRef = DB37C7A01DE5DD8900131817 /* 1.txt */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		DB37C7A31DE5DD9D00131817 /* 1.json in Copy Files */ = {isa = PBXBuildFile; fileRef = DB37C7A21DE5DD9D00131817 /* 1.json */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		DBA840A41DEAB3CA002CF1CC /* 2.json in Copy Files */ = {isa = PBXBuildFile; fileRef = DBA840A31DEAB3C2002CF1CC /* 2.json */; };
+		DBA840A41DEAB3CA002CF1CC /* 2.json in Copy Files */ = {isa = PBXBuildFile; fileRef = DBA840A31DEAB3C2002CF1CC /* 2.json */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		DBA840AA1DEB48A7002CF1CC /* 3.json in Copy Files */ = {isa = PBXBuildFile; fileRef = DBA840A91DEB48A0002CF1CC /* 3.json */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -22,6 +23,7 @@
 			dstPath = file;
 			dstSubfolderSpec = 16;
 			files = (
+				DBA840AA1DEB48A7002CF1CC /* 3.json in Copy Files */,
 				DBA840A41DEAB3CA002CF1CC /* 2.json in Copy Files */,
 				DB37C7A31DE5DD9D00131817 /* 1.json in Copy Files */,
 				DB37C7A11DE5DD8900131817 /* 1.txt in Copy Files */,
@@ -41,6 +43,7 @@
 		DB37C7A01DE5DD8900131817 /* 1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = 1.txt; path = YorkServer/1.txt; sourceTree = "<group>"; };
 		DB37C7A21DE5DD9D00131817 /* 1.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = 1.json; path = YorkServer/1.json; sourceTree = "<group>"; };
 		DBA840A31DEAB3C2002CF1CC /* 2.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = 2.json; path = YorkServer/2.json; sourceTree = "<group>"; };
+		DBA840A91DEB48A0002CF1CC /* 3.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = 3.json; path = YorkServer/3.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +60,7 @@
 		06AC15DE1DE56F1500421FF8 = {
 			isa = PBXGroup;
 			children = (
+				DBA840A91DEB48A0002CF1CC /* 3.json */,
 				DBA840A31DEAB3C2002CF1CC /* 2.json */,
 				DB37C7A21DE5DD9D00131817 /* 1.json */,
 				DB37C7A01DE5DD8900131817 /* 1.txt */,

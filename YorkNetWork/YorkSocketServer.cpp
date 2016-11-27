@@ -63,6 +63,8 @@ namespace YorkNet {
 		}
 
 		std::cout << "Create thread on listening client message"<<std::endl;
+        
+        //std::ifstream ins("./file/3.json",std::ifstream::in);
 
 		connectThread = std::thread(&YorkNet::YorkSocketServer::runServer, this);
 		connectThread.detach();
@@ -75,7 +77,7 @@ namespace YorkNet {
 		//runServer();
 		
         while (true) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            std::this_thread::sleep_for(hearBeatC);
         }
 		
 	}
@@ -84,7 +86,7 @@ namespace YorkNet {
     {
         //while (true)
         //{
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(hearBeatC);
         
             std::string input = "";
             std::cin >> input;
@@ -124,7 +126,10 @@ namespace YorkNet {
                 std::cout << "Input ClientID" << std::endl;
                 int id = 0;
                 std::cin >> id;
-                SentFileTo(id, "./file/3.json");
+                
+                std::string filePath = YorkNetwork::getDirPath("1.json");
+                
+                SentFileTo(id, filePath);
             }
             
         commandSystem();
@@ -167,7 +172,9 @@ namespace YorkNet {
 	{
 		while (1)
 		{
+            //std::ifstream ins("./file/3.json",std::ifstream::in);
             
+            std::this_thread::sleep_for(hearBeatC);
 			if (clients.size() == 0)
 				continue;
             std::map<std::string, int>::iterator it;
@@ -238,9 +245,10 @@ namespace YorkNet {
 //		char sentChar[sentSize + 1];
 //        sentChar[sentSize] = endOfStream;
         char *sentChar = YorkNetwork::createBuffer(words, tag, TOB, IOB);
+        int64_t size = words.length();
         
 		//strcpy(sentChar, words.c_str());
-		if (send(socketID, sentChar, MAX_BUFFER_SIZE, 0) == -1) {
+		if (send(socketID, sentChar, size + HEADER_LENGTH, 0) == -1) {
 			perror("Send error！");
             std::map<std::string, int>::iterator it;
             for (it = clients.begin(); it != clients.end(); it++)
@@ -259,17 +267,14 @@ namespace YorkNet {
 	{
         std::vector<std::string> needToDelete =  std::vector<std::string>();
         
-        unsigned long sentSize = words.size();
-        char sentChar[sentSize + 1];
-        sentChar[sentSize] = endOfStream;
-        
-		strcpy(sentChar, words.c_str());
+        char *sentChar = YorkNetwork::createBuffer(words, tag, TOB, IOB);
+        int64_t size = words.length();
 
         std::map<std::string, int>::iterator it;
 		for (it = clients.begin(); it != clients.end(); it++)
 		{
 			fcntl(it->second, F_SETFL, O_NONBLOCK);
-			if (send(it->second, sentChar, sentSize, 0) == -1)
+			if (send(it->second, sentChar, size + HEADER_LENGTH, 0) == -1)
 			{
 				if (errno == EWOULDBLOCK)
 				{
@@ -291,17 +296,22 @@ namespace YorkNet {
         
         
         // count fileBlock sent
-        size_t fileSize = YorkNetwork::getFileSize(filePath);
+        int64_t fileSize = YorkNetwork::getFileSize(filePath);
+        
+        if(fileSize <= 0)
+        {
+            
+        }
         char buffer[fileSize];
         
         size_t fileBlockTotal = 1;//fileSize/FILE_BUFFER_SIZE;
         if(fileSize%FILE_BUFFER_SIZE > 0)
             fileBlockTotal++;
         
-        std::ifstream ins("./file/1.json",std::ifstream::binary);
+        //std::ifstream ins("./file/1.txt",std::ifstream::in);
      
-        FILE *fileR ;
-        fileR = std::fopen(filePath.c_str(), "rb");
+        FILE *fileR = nullptr;
+        fileR = std::fopen(filePath.c_str(), "w+");
         
         if(fileR == NULL)
         {

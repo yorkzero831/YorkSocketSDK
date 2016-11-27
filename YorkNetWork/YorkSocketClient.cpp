@@ -143,7 +143,7 @@ namespace YorkNet {
                         
                         
                         memcpy(&thisHeader, headerBuff, HEADER_LENGTH);
-                        if(thisHeader.tag!=0 && thisHeader.length >=0 && thisHeader.indexOfBlock>=0 && thisHeader.totalBlock >0)
+                        if(thisHeader.tag!=0 && thisHeader.begin==10001)
                         {
                             if(thisHeader.totalBlock < thisHeader.indexOfBlock){break;}
                             isChecked_header = true;
@@ -171,6 +171,7 @@ namespace YorkNet {
                     }
                 }
                 std::cout <<  " Received:" << contextBuff << std::endl;
+                didGetMessage(contextBuff, thisHeader);
             }
             
         }

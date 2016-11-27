@@ -20,6 +20,7 @@ namespace YorkNet {
 		virtual ~YorkSocketClient();
         void connectTo(std::string ip, int port = DEFULT_PORT);
         void writeToServer(std::string message);
+        virtual void  didGetMessage(const char *inMessage,const Header &header){};
         
     private:
         std::string ipAddr;
