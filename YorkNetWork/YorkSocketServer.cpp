@@ -127,9 +127,7 @@ namespace YorkNet {
                 int id = 0;
                 std::cin >> id;
                 
-                std::string filePath = YorkNetwork::getDirPath("1.json");
-                
-                SentFileTo(id, filePath);
+                SentFileTo(id, "3", "json");
             }
             
         commandSystem();
@@ -244,7 +242,7 @@ namespace YorkNet {
 //		unsigned long sentSize = words.size();
 //		char sentChar[sentSize + 1];
 //        sentChar[sentSize] = endOfStream;
-        char *sentChar = YorkNetwork::createBuffer(words, tag, TOB, IOB);
+        char *sentChar = createBuffer(words, tag, TOB, IOB);
         int64_t size = words.length();
         
 		//strcpy(sentChar, words.c_str());
@@ -267,7 +265,7 @@ namespace YorkNet {
 	{
         std::vector<std::string> needToDelete =  std::vector<std::string>();
         
-        char *sentChar = YorkNetwork::createBuffer(words, tag, TOB, IOB);
+        char *sentChar = createBuffer(words, tag, TOB, IOB);
         int64_t size = words.length();
 
         std::map<std::string, int>::iterator it;
@@ -291,12 +289,13 @@ namespace YorkNet {
         }
 	}
     
-    void YorkSocketServer::SentFileTo(int socketID, std::string filePath)
+    void YorkSocketServer::SentFileTo(int socketID, std::string fileName, std::string fileType)
     {
-        
+        std::string filePath       = fileName + "." + fileType;
+        std::string fileAbslutPath = getDirPath(filePath);
         
         // count fileBlock sent
-        int64_t fileSize = YorkNetwork::getFileSize(filePath);
+        int64_t fileSize = getFileSize(fileAbslutPath);
 
         char buffer[FILE_BUFFER_SIZE];
         
@@ -305,7 +304,7 @@ namespace YorkNet {
             fileBlockTotal++;
         
      
-        FILE *fileR = std::fopen("./file/1.json", "r");
+        FILE *fileR = std::fopen(fileAbslutPath.c_str(), "r");
         
         if(fileR == NULL)
         {
@@ -313,6 +312,10 @@ namespace YorkNet {
             std::cout << "Can not OpenFile "<< filePath << std::endl;
             return;
         }
+        
+        FileTypes thisType = getFileType(fileType);
+        
+        
         
         
         int thisBlockNum = 0;
@@ -329,7 +332,7 @@ namespace YorkNet {
             std::cout << "file_block_length: " << file_block_length << std::endl;
             std::cout << "content: " << buffer << std::endl;
             
-            char *sentChar = YorkNetwork::createBuffer(buffer, 2, fileBlockTotal, thisBlockNum);
+            char *sentChar = createBuffer(buffer, 2, fileBlockTotal, thisBlockNum, fileName, thisType);
             int64_t sentLenth = strlen(buffer);
             
             if(send(socketID, sentChar, sentLenth + HEADER_LENGTH, 0) < 0)

@@ -10,8 +10,8 @@
 
 #define DEFULT_PORT         10833
 #define  MAX_BUFFER_SIZE    1000
-#define HEADER_LENGTH       40
-#define FILE_BUFFER_SIZE    984
+#define HEADER_LENGTH       72
+#define FILE_BUFFER_SIZE    1024
 
 
 
@@ -57,6 +57,14 @@ namespace YorkNet {
 			CANNOTACCETTCLIENT
 		};
         
+        enum FileTypes
+        {
+            NONE,
+            JSON,
+            JPG,
+            PNG
+        };
+        
 		struct ErrorMessage
 		{
 			ErrorWord errorWords;
@@ -68,6 +76,7 @@ namespace YorkNet {
 			}
 		};
         
+        
         struct Header
         {
             int64_t begin;
@@ -75,13 +84,30 @@ namespace YorkNet {
             int64_t length;
             int64_t indexOfBlock;
             int64_t totalBlock;
-            Header(const int64_t &Tag, const int64_t &Length, const int64_t &TB, const int64_t &IOB )
+            std::string fileName;
+            FileTypes fileType;
+            
+            Header(const int64_t &Tag, const int64_t &Length, const int64_t &TB, const int64_t &IOB , const std::string &fn, const FileTypes &ft)
             {
                 begin           = 10001;
                 tag             = Tag;
                 length          = Length;
                 indexOfBlock    = IOB;
                 totalBlock      = TB;
+                fileName        = fn;
+                fileType        = ft;
+                
+            }
+            Header(const int64_t &Tag, const int64_t &Length, const int64_t &TB, const int64_t &IOB)
+            {
+                begin           = 10001;
+                tag             = Tag;
+                length          = Length;
+                indexOfBlock    = IOB;
+                totalBlock      = TB;
+                fileName        = "";
+                fileType        = NONE;
+                
             }
             Header()
             {
@@ -90,6 +116,8 @@ namespace YorkNet {
                 length          = -1;
                 indexOfBlock    = -1;
                 totalBlock      = -1;
+                fileName        = "";
+                fileType        = NONE;
             }
         };
 		void ShowErrorMessage(ErrorMessage message);
@@ -98,19 +126,27 @@ namespace YorkNet {
         
         const std::chrono::milliseconds hearBeatC = std::chrono::milliseconds(10);
         
-        static char* createBuffer(char *preBuffer, int64_t tag, int64_t numOfBlock = 1, int64_t indexOfBlock = 1);
-        static char* createBuffer(std::string message, int64_t tag , int64_t numOfBlock = 1, int64_t indexOfBlock = 1);
-        static size_t getFileSize(const std::string& fileName);
+        char* createBuffer( char *preBuffer, int64_t &tag, int64_t numOfBlock = 1,  int64_t indexOfBlock = 1, std::string fileName = "",  FileTypes fileType = FileTypes::NONE);
+        
+        char* createBuffer(std::string message, int64_t tag, int64_t numOfBlock = 1, int64_t indexOfBlock = 1, std::string fileName = "", FileTypes fileType = FileTypes::NONE);
+        
+        //char* createBuffer( char *preBuffer,  int64_t tag, int64_t numOfBlock = 1,  int64_t indexOfBlock = 1,  std::string fileName = "",  FileTypes fileType = FileTypes::NONE);
+        
+        size_t getFileSize(const std::string& fileName);
+        
+        
         
         virtual void didGetMessage(const char *inMessage,const Header &header){};
         
 //    private:
         
-        static char* intToChar(const int64_t input);
-        static int64_t charToInt(const char* input);
-        static int64_t charToInt(const char* input, int beginP, int endP);
+        char* intToChar(const int64_t input);
+        int64_t charToInt(const char* input);
+        int64_t charToInt(const char* input, int beginP, int endP);
         
-        static std::string getDirPath(std::string ins);
+        std::string getDirPath(std::string ins);
+        
+        FileTypes getFileType(std::string ins);
         
 	};
     

@@ -24,12 +24,12 @@ namespace YorkNet {
 		std::cout << message.errorWords << " WITH ERROMESSAGE : " << message.details<<std::endl;
 	}
     
-    char* YorkNetwork::createBuffer(char *preBuffer, int64_t tag, int64_t numOfBlock, int64_t indexOfBlock)
+    char* YorkNetwork::createBuffer( char *preBuffer,  int64_t &tag, int64_t numOfBlock,  int64_t indexOfBlock,  std::string fileName,  FileTypes fileType)
     {
         int64_t bufferLength    = strlen(preBuffer);
         char *out               = new char[bufferLength + HEADER_LENGTH];
         int64_t tagTrue         = tag==0?1:tag;
-        Header header           = Header(tagTrue, bufferLength, numOfBlock, indexOfBlock);
+        Header header           = Header(tagTrue, bufferLength, numOfBlock, indexOfBlock, fileName, fileType);
         
         memcpy(out, &header, HEADER_LENGTH);
         //int64_t ss = strlen(out);
@@ -39,12 +39,12 @@ namespace YorkNet {
         return out;
     }
     
-    char* YorkNetwork::createBuffer(std::string message, int64_t tag, int64_t numOfBlock, int64_t indexOfBlock)
+    char* YorkNetwork::createBuffer(std::string message,  int64_t tag, int64_t numOfBlock, int64_t indexOfBlock,  std::string fileName,  FileTypes fileType)
     {
         int64_t bufferLength    = message.length();
         char *out               = new char[bufferLength + HEADER_LENGTH];
         int64_t tagTrue         = tag==0?1:tag;
-        Header header           = Header(tagTrue, bufferLength, numOfBlock, indexOfBlock);
+        Header header           = Header(tagTrue, bufferLength, numOfBlock, indexOfBlock, fileName, fileType);
         
         
         memcpy(out, &header, HEADER_LENGTH);
@@ -118,6 +118,26 @@ namespace YorkNet {
             out += "/file/";
             out += ins;
         }
+        return out;
+    }
+    
+    YorkNetwork::FileTypes YorkNetwork::getFileType(std::string ins)
+    {
+        FileTypes out = YorkNetwork::FileTypes::NONE;
+        
+        if(ins == "png" || ins == "PNG" )
+        {
+            out = YorkNetwork::FileTypes::PNG;
+        }
+        else if(ins == "json" || ins == "JSON" )
+        {
+            out = YorkNetwork::FileTypes::JSON;
+        }
+        else if(ins == "jpg" || ins == "JPG" )
+        {
+            out = YorkNetwork::FileTypes::JPG;
+        }
+        
         return out;
     }
 
