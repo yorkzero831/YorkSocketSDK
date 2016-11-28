@@ -297,21 +297,15 @@ namespace YorkNet {
         
         // count fileBlock sent
         int64_t fileSize = YorkNetwork::getFileSize(filePath);
+
+        char buffer[FILE_BUFFER_SIZE];
         
-        if(fileSize <= 0)
-        {
-            
-        }
-        char buffer[fileSize];
-        
-        size_t fileBlockTotal = 1;//fileSize/FILE_BUFFER_SIZE;
+        size_t fileBlockTotal = fileSize/FILE_BUFFER_SIZE;
         if(fileSize%FILE_BUFFER_SIZE > 0)
             fileBlockTotal++;
         
-        //std::ifstream ins("./file/1.txt",std::ifstream::in);
      
-        FILE *fileR = nullptr;
-        fileR = std::fopen(filePath.c_str(), "w+");
+        FILE *fileR = std::fopen("./file/1.json", "r");
         
         if(fileR == NULL)
         {
@@ -323,9 +317,12 @@ namespace YorkNet {
         
         int thisBlockNum = 0;
         
-        bzero(buffer, fileSize);
+        bzero(buffer, FILE_BUFFER_SIZE);
         int file_block_length = 0;
-        while( (file_block_length = fread(buffer, sizeof(char), fileSize, fileR)) > 0)
+        
+        //char *oo = fgets(buffer, 100, fileR);
+        
+        while( (file_block_length = fread(buffer, sizeof(char), FILE_BUFFER_SIZE, fileR)) > 0)
         {
             thisBlockNum ++;
             
@@ -333,20 +330,21 @@ namespace YorkNet {
             std::cout << "content: " << buffer << std::endl;
             
             char *sentChar = YorkNetwork::createBuffer(buffer, 2, fileBlockTotal, thisBlockNum);
+            int64_t sentLenth = strlen(buffer);
             
-            if(send(socketID, sentChar, fileSize, 0) < 0)
+            if(send(socketID, sentChar, sentLenth + HEADER_LENGTH, 0) < 0)
             {
                 std::cout << "Error on sending file"  << std::endl;
                 break;
             }
             
-            bzero(buffer, fileSize);
+            bzero(buffer, FILE_BUFFER_SIZE);
             
         }
         //SentMessageTo(socketID, "",1);
         
         fclose(fileR);
-        std::cout << "File: "<< filePath<<"transfer finished"  << std::endl;
+        std::cout << "File: "<< filePath<<" Transfer finished"  << std::endl;
         
     }
     

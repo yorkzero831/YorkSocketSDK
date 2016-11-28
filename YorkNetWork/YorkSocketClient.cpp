@@ -123,7 +123,7 @@ namespace YorkNet {
             {
                 while (buf_Pointer < HEADER_LENGTH)
                 {
-                    std::this_thread::sleep_for(hearBeatC);
+                    //std::this_thread::sleep_for(hearBeatC);
                     fcntl(sockID, F_SETFL,  O_NONBLOCK);
                     if (read(sockID, &headerBuff[buf_Pointer], 1) <= 0)
                     {
