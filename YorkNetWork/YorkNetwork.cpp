@@ -24,9 +24,12 @@ namespace YorkNet {
 		std::cout << message.errorWords << " WITH ERROMESSAGE : " << message.details<<std::endl;
 	}
     
-    char* YorkNetwork::createBuffer( char *preBuffer,  int64_t &tag, int64_t numOfBlock,  int64_t indexOfBlock,  std::string fileName,  FileTypes fileType)
+    char* YorkNetwork::createBuffer( char *preBuffer,  int64_t tag, int64_t numOfBlock,  int64_t indexOfBlock,  std::string fileName,  FileTypes fileType)
     {
-        int64_t bufferLength    = strlen(preBuffer);
+        int64_t bufferLength;
+        if(fileName == ""){ bufferLength = strlen(preBuffer); }
+        else{ bufferLength =  FILE_BUFFER_SIZE; }
+        
         char *out               = new char[bufferLength + HEADER_LENGTH];
         int64_t tagTrue         = tag==0?1:tag;
         Header header           = Header(tagTrue, bufferLength, numOfBlock, indexOfBlock, fileName, fileType);
@@ -41,7 +44,10 @@ namespace YorkNet {
     
     char* YorkNetwork::createBuffer(std::string message,  int64_t tag, int64_t numOfBlock, int64_t indexOfBlock,  std::string fileName,  FileTypes fileType)
     {
-        int64_t bufferLength    = message.length();
+        int64_t bufferLength;
+        if(fileName == ""){ bufferLength = message.length(); }
+        else{ bufferLength =  FILE_BUFFER_SIZE; }
+        
         char *out               = new char[bufferLength + HEADER_LENGTH];
         int64_t tagTrue         = tag==0?1:tag;
         Header header           = Header(tagTrue, bufferLength, numOfBlock, indexOfBlock, fileName, fileType);
@@ -137,7 +143,35 @@ namespace YorkNet {
         {
             out = YorkNetwork::FileTypes::JPG;
         }
+        else if(ins == "txt" || ins == "TXT" )
+        {
+            out = YorkNetwork::FileTypes::TXT;
+        }
         
+        return out;
+    }
+    
+    std::string YorkNetwork::getStringByFileType(YorkNet::YorkNetwork::FileTypes ins)
+    {
+        std::string out = "";
+        switch (ins)
+        {
+            case FileTypes::PNG :
+                out = ".png";
+                break;
+            case FileTypes::JSON :
+                out = ".json";
+                break;
+            case FileTypes::JPG :
+                out = ".jpg";
+                break;
+            case FileTypes::TXT :
+                out = ".txt";
+                break;
+            case FileTypes::NONE :
+                out = "";
+                break;
+        }
         return out;
     }
 

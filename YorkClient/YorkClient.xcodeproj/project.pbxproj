@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		066276AC1DED5004003A1071 /* 1.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 066276AB1DED4FED003A1071 /* 1.json */; };
+		066276AE1DED5EBC003A1071 /* 1.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 066276AD1DED5EB0003A1071 /* 1.png */; };
 		DB37C79D1DE5DC4400131817 /* YorkNetwork.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB37C7981DE5DC4400131817 /* YorkNetwork.cpp */; };
 		DB37C79E1DE5DC4400131817 /* YorkSocketClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB37C79A1DE5DC4400131817 /* YorkSocketClient.cpp */; };
 		DB37C79F1DE5DC4400131817 /* YorkSocketSDKClientSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB37C79C1DE5DC4400131817 /* YorkSocketSDKClientSample.cpp */; };
@@ -15,16 +17,20 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		DB37C78C1DE5DC2D00131817 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			buildActionMask = 12;
+			dstPath = file;
+			dstSubfolderSpec = 16;
 			files = (
+				066276AE1DED5EBC003A1071 /* 1.png in CopyFiles */,
+				066276AC1DED5004003A1071 /* 1.json in CopyFiles */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		066276AB1DED4FED003A1071 /* 1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = 1.json; sourceTree = "<group>"; };
+		066276AD1DED5EB0003A1071 /* 1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 1.png; sourceTree = "<group>"; };
 		DB37C78E1DE5DC2D00131817 /* YorkClient */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = YorkClient; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB37C7981DE5DC4400131817 /* YorkNetwork.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = YorkNetwork.cpp; path = ../../YorkNetWork/YorkNetwork.cpp; sourceTree = "<group>"; };
 		DB37C7991DE5DC4400131817 /* YorkNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YorkNetwork.h; path = ../../YorkNetWork/YorkNetwork.h; sourceTree = "<group>"; };
@@ -47,6 +53,8 @@
 		DB37C7851DE5DC2D00131817 = {
 			isa = PBXGroup;
 			children = (
+				066276AB1DED4FED003A1071 /* 1.json */,
+				066276AD1DED5EB0003A1071 /* 1.png */,
 				DB37C7901DE5DC2D00131817 /* YorkClient */,
 				DB37C78F1DE5DC2D00131817 /* Products */,
 			);
@@ -258,6 +266,7 @@
 				DB37C7971DE5DC2D00131817 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

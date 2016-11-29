@@ -30,7 +30,11 @@ namespace YorkNet {
 		void SentMessageTo(int socketID, std::string words, int64_t tag, int64_t IOB = 1, int64_t TOB =1);
 		void SentMessageToALL(std::string words, int64_t tag, int64_t IOB = 1, int64_t TOB =1);
         void SentFileTo(int socketID, std::string fileName, std::string fileType);
-		virtual void DidRecivedMessage(const int& clientID,const std::string& Addr);
+		//virtual void DidRecivedMessage(const int& clientID,const std::string& Addr);
+        
+        virtual void didGetMessage(const char *inMessage,const Header &header){};
+        virtual void didGetFile(const char *inMessage,const Header &header);
+        
 		
 	private:
 		std::thread connectThread;
@@ -46,12 +50,13 @@ namespace YorkNet {
 		struct sockaddr_in remote_addr;
 		struct sockaddr_in server_addr;
 		char buf[MAX_BUFFER_SIZE];
-		pthread_t clientThreadID[MAXCLIENTNUM];
-		std::map<std::string, int> clients;
+        
+        std::map<int, std::thread*> waitingMessageThreads;
+        std::map<std::string, int> clients = std::map<std::string, int>();
 
 		void bindServer();
 		void runServer();
-		void waitingMessage();
+        void waitingMessage(int socketID, std::string key);
         void commandSystem();
         
         

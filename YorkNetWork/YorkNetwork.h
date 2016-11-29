@@ -9,9 +9,9 @@
 #define YORKNETWORK_H_
 
 #define DEFULT_PORT         10833
-#define  MAX_BUFFER_SIZE    1000
+#define  MAX_BUFFER_SIZE    2120
 #define HEADER_LENGTH       72
-#define FILE_BUFFER_SIZE    1024
+#define FILE_BUFFER_SIZE    4096
 
 
 
@@ -62,7 +62,8 @@ namespace YorkNet {
             NONE,
             JSON,
             JPG,
-            PNG
+            PNG,
+            TXT
         };
         
 		struct ErrorMessage
@@ -120,13 +121,25 @@ namespace YorkNet {
                 fileType        = NONE;
             }
         };
+        
+        struct RecivedData
+        {
+            Header header;
+            char*  data;
+            RecivedData(Header h, char* d)
+            {
+                header  = h;
+                data    = d;
+            }
+        };
+        
 		void ShowErrorMessage(ErrorMessage message);
         
         char endOfStream    = '\0';
         
         const std::chrono::milliseconds hearBeatC = std::chrono::milliseconds(10);
         
-        char* createBuffer( char *preBuffer, int64_t &tag, int64_t numOfBlock = 1,  int64_t indexOfBlock = 1, std::string fileName = "",  FileTypes fileType = FileTypes::NONE);
+        char* createBuffer( char *preBuffer, int64_t tag, int64_t numOfBlock = 1,  int64_t indexOfBlock = 1, std::string fileName = "",  FileTypes fileType = FileTypes::NONE);
         
         char* createBuffer(std::string message, int64_t tag, int64_t numOfBlock = 1, int64_t indexOfBlock = 1, std::string fileName = "", FileTypes fileType = FileTypes::NONE);
         
@@ -147,6 +160,7 @@ namespace YorkNet {
         std::string getDirPath(std::string ins);
         
         FileTypes getFileType(std::string ins);
+        std::string getStringByFileType(FileTypes ins);
         
 	};
     

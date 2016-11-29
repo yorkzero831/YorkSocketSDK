@@ -69,8 +69,8 @@ namespace YorkNet {
 		connectThread = std::thread(&YorkNet::YorkSocketServer::runServer, this);
 		connectThread.detach();
 
-		waitMesThread = std::thread(&YorkNet::YorkSocketServer::waitingMessage, this);
-		waitMesThread.detach();
+		//waitMesThread = std::thread(&YorkNet::YorkSocketServer::waitingMessage, this);
+		//waitMesThread.detach();
         
         cmdSysThread = std::thread(&YorkNet::YorkSocketServer::commandSystem, this);
         cmdSysThread.detach();
@@ -127,7 +127,15 @@ namespace YorkNet {
                 int id = 0;
                 std::cin >> id;
                 
-                SentFileTo(id, "3", "json");
+                SentFileTo(id, "1", "json");
+            }
+            else if(input == "sentFile1")
+            {
+                std::cout << "Input ClientID" << std::endl;
+                int id = 0;
+                std::cin >> id;
+                
+                SentFileTo(id, "1", "txt");
             }
             
         commandSystem();
@@ -161,80 +169,158 @@ namespace YorkNet {
 					SentMessageTo(clientSocket, "You are In!!",1);
 					//exit(0);
 				}
+                
+                std::thread* waitingMessage = new std::thread(&YorkNet::YorkSocketServer::waitingMessage, this, clientSocket, ctrr);
+                waitingMessage->detach();
+                waitingMessageThreads.insert(std::pair<int, std::thread*>(clientSocket, waitingMessage));
 			}
 			
 		}
 	}
-
-	void YorkSocketServer::waitingMessage()
-	{
-		while (1)
-		{
-            //std::ifstream ins("./file/3.json",std::ifstream::in);
-            
+    
+    void YorkSocketServer::waitingMessage(int socketID, std::string key)
+    {
+        std::cout<<"Waiting Message For "<<key<<std::endl;
+        std::vector<RecivedData>fileContextList = std::vector<RecivedData>();
+        std::string thisFileName          = "";
+        FileTypes   thisFileType          = FileTypes::NONE;
+        while (1)
+        {
             std::this_thread::sleep_for(hearBeatC);
-			if (clients.size() == 0)
-				continue;
-            std::map<std::string, int>::iterator it;
-			for (it = clients.begin(); it != clients.end(); it++)
-			{
-				
-				/*thread waitForClient = thread(&YorkNet::YorkSocketServer::waitingMessagePerClient,this,it);
-				waitForClient.detach();*/
-                int timeCount = 0;
-				int thisSocket = it->second;
-				size_t buf_Pointer = 0;
-				char thisBuf[MAX_BUFFER_SIZE] = { 0 };
-				while (buf_Pointer < MAX_BUFFER_SIZE)
-				{
-					fcntl(thisSocket, F_SETFL,  O_NONBLOCK);
-					if (read(thisSocket, &thisBuf[buf_Pointer], 1) <= 0)
-					{
-						if (errno == EWOULDBLOCK)
-						{
-							//std::cout << "nothing" << std::endl;
-							break;;
-						}
-						else
-						{
-							std::cout << it->first << " Removed" << std::endl;
-							clients.erase(it);
-                            close(it->second);
-							int count = clients.size();
-							break;
-						}
-					}
+            
+            bool isChecked_header                       = false;
+            bool fileDataBegin                             = false;
+            
+            Header thisHeader;
+            
+            
+            size_t buf_Pointer                          = 0;
+            size_t buf_Context_Pointer                  = 0;
+            char headerBuff[HEADER_LENGTH]              = { 0 };
+            char *contextBuff                           = nullptr;
+            
+            if(!isChecked_header)
+            {
+                while (buf_Pointer < HEADER_LENGTH)
+                {
+                    //std::this_thread::sleep_for(hearBeatC);
+                    fcntl(socketID, F_SETFL,  O_NONBLOCK);
+                    if (read(socketID, &headerBuff[buf_Pointer], 1) <= 0)
+                    {
+                        if (errno == EWOULDBLOCK){ break; }
+                        else
+                        {
+                            std::cout << key << " Removed" << std::endl;
+                            clients.erase(key);
+                            close(clientSocket);
+                            waitingMessageThreads.erase(socketID);
+                            return;
+                        }
+                    }
+                    if (buf_Pointer == HEADER_LENGTH-1)
+                    {
+                        //std::cout <<  " Received:" << headerBuff << std::endl;
+                        
+                        memcpy(&thisHeader, headerBuff, HEADER_LENGTH);
+                        if(thisHeader.tag!=0 && thisHeader.begin==10001)
+                        {
+                            if(thisHeader.totalBlock < thisHeader.indexOfBlock){ break; }
+                            
+                            isChecked_header = true;
+                            contextBuff = new char[thisHeader.length];
+                            
+                            if(thisHeader.fileName != "" && !fileDataBegin )
+                            {
+                                fileDataBegin = true;
+                                thisFileName = thisHeader.fileName;
+                                thisFileType = thisHeader.fileType;
+                            }
+                        }
+                        break;
+                    }
+                    
+                    buf_Pointer++;
+                }
+            }
+            if(isChecked_header)
+            {
+                fcntl(socketID, F_SETFL,  O_NONBLOCK);
+                if (read(socketID, &contextBuff[buf_Context_Pointer], thisHeader.length) <= 0)
+                {
+                    if (errno == EWOULDBLOCK){ break; }
+                    else{ break; }
+                }
+                std::cout <<  "Received From "<< key << " : "<< contextBuff << std::endl;
+                
+                ////call
+                if(!fileDataBegin) didGetMessage(contextBuff, thisHeader);
+                ////
+                
+                if(fileDataBegin && thisFileName == thisHeader.fileName && thisFileType == thisHeader.fileType)
+                {
+                    
+                    fileContextList.push_back(RecivedData(thisHeader,contextBuff));
+                    
+                    if(thisHeader.indexOfBlock == thisHeader.totalBlock)
+                    {
+                        int64_t blockCount = thisHeader.totalBlock;
+                        int64_t thisfileLength;
+                        if(blockCount > 2)
+                        {
+                            thisfileLength = FILE_BUFFER_SIZE * ( blockCount -1 );
+                            thisfileLength += fileContextList.at(blockCount-1).header.length;
+                        }
+                        else
+                        {
+                            thisfileLength = thisHeader.length;
+                        }
+                        //char* fileDataTotal = new char[thisfileLength];
+                        std::string fileDataTotal;
+                        
+                        int64_t totalFileLength = 0;
+                        LOOP(thisHeader.totalBlock)
+                        {
+                            //Index error
+                            if(fileContextList.at(ii).header.indexOfBlock != (ii +1))
+                            {
+                                std::cout <<  "Recived file index error:" << std::endl;
+                                thisFileName = "";
+                                fileDataBegin = false;
+                                thisFileType = FileTypes::NONE;
+                                fileContextList.clear();
+                                break;
+                            }
+                            totalFileLength += fileContextList.at(ii).header.length;
+                            fileDataTotal += fileContextList.at(ii).data;
+                        }
+                        ////call
+                        Header outHeader = Header(thisHeader.tag,totalFileLength,1,1);
+                        didGetFile(fileDataTotal.c_str(), outHeader);
+                        ////
+                        
+                        thisFileName = "";
+                        fileDataBegin = false;
+                        thisFileType = FileTypes::NONE;
+                        fileContextList.clear();
+                    }
+                }
+                else
+                {
+                    thisFileName = "";
+                    fileDataBegin = false;
+                    thisFileType = FileTypes::NONE;
+                    fileContextList.clear();
+                }
+                
 
-
-					if (buf_Pointer > 0 && endOfStream == thisBuf[buf_Pointer])
-					{
-						std::cout << it->first << " Received:" << thisBuf << std::endl;
-						DidRecivedMessage(it->second, it->first);
-						break;
-					}
-
-					buf_Pointer++;
-				}
-                timeCount ++;
-                if(timeCount > clients.size())
-                    break;
-
-			}
-		}
-        
-	}
-
-
-
+            }
+            
+        }
+    }
 
 	void YorkSocketServer::StopServer()
 	{
 		close(listenSocket);
-	}
-
-	void YorkSocketServer::DidRecivedMessage(const int& clientID, const std::string& Addr)
-	{
-
 	}
 
 	void YorkSocketServer::SentMessageTo(int socketID, std::string words, int64_t tag, int64_t IOB, int64_t TOB)
@@ -304,7 +390,18 @@ namespace YorkNet {
             fileBlockTotal++;
         
      
-        FILE *fileR = std::fopen(fileAbslutPath.c_str(), "r");
+        FileTypes fileTypeT = getFileType(fileType);
+        
+        FILE *fileR;
+        
+        if(fileTypeT == FileTypes::TXT || fileTypeT == FileTypes::JSON || fileTypeT == FileTypes::NONE)
+        {
+            fileR = std::fopen(fileAbslutPath.c_str(), "r");
+        }
+        else
+        {
+            fileR = std::fopen(fileAbslutPath.c_str(), "rb");
+        }
         
         if(fileR == NULL)
         {
@@ -312,11 +409,7 @@ namespace YorkNet {
             std::cout << "Can not OpenFile "<< filePath << std::endl;
             return;
         }
-        
-        FileTypes thisType = getFileType(fileType);
-        
-        
-        
+            
         
         int thisBlockNum = 0;
         
@@ -329,10 +422,10 @@ namespace YorkNet {
         {
             thisBlockNum ++;
             
-            std::cout << "file_block_length: " << file_block_length << std::endl;
-            std::cout << "content: " << buffer << std::endl;
+            std::cout << thisBlockNum << " file_block_length: " << file_block_length << std::endl;
+            //std::cout << "content: " << buffer << std::endl;
             
-            char *sentChar = createBuffer(buffer, 2, fileBlockTotal, thisBlockNum, fileName, thisType);
+            char *sentChar = createBuffer(buffer, 2, fileBlockTotal, thisBlockNum, fileName, fileTypeT);
             int64_t sentLenth = strlen(buffer);
             
             if(send(socketID, sentChar, sentLenth + HEADER_LENGTH, 0) < 0)
@@ -348,6 +441,25 @@ namespace YorkNet {
         
         fclose(fileR);
         std::cout << "File: "<< filePath<<" Transfer finished"  << std::endl;
+        
+    }
+    
+    void YorkSocketServer::didGetFile(const char *inMessage, const YorkNet::YorkNetwork::Header &header)
+    {
+        std::string fileName = "temp" + getStringByFileType(header.fileType);
+        
+        FILE *fileToWrite;
+        if(header.fileType == FileTypes::TXT || header.fileType == FileTypes::JSON || header.fileType == FileTypes::NONE)
+        {
+            fileToWrite = fopen(getDirPath(fileName).c_str(), "w+");
+        }
+        else
+        {
+            fileToWrite = fopen(getDirPath(fileName).c_str(), "wb");
+        }
+        fwrite(inMessage, sizeof(char), header.length, fileToWrite);
+        fclose(fileToWrite);
+        std::cout<<"Finsh on save file"<< std::endl;
         
     }
     
