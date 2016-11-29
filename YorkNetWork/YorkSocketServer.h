@@ -2,7 +2,7 @@
  * YorkSocketServer.h
  *
  *  Created on: 2016年10月17日
- *      Author: yorkzero
+ *      Author: yorkzero8
  */
 
 #ifndef YORKSOCKETSERVER_H_
