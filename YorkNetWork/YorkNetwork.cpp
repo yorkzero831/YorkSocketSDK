@@ -124,9 +124,31 @@ namespace YorkNet {
             
             if(send(socketID, sentChar, blockLenth+HEADER_LENGTH, 0) < 0)
             {
-                delete sentChar;
-                std::cout << "Error on sending file"  << std::endl;
-                break;
+                int couter = 0;
+                bool fixed = false;
+                while (couter <100)
+                {
+                    std::this_thread::sleep_for(hearBeatC);
+                    couter++;
+                    if(send(socketID, sentChar, blockLenth+HEADER_LENGTH, 0) < 0 )
+                    {
+                        std::cout<<"Fixing"<<std::endl;
+                        continue;
+                    }
+                    else
+                    {
+                        fixed = true;
+                        break;
+                    }
+                }
+                
+                if(!fixed)
+                {
+                    delete sentChar;
+                    std::cout << "Error on sending file"  << std::endl;
+                    break;
+                }
+                
             }
             
             delete sentChar;

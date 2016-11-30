@@ -121,7 +121,7 @@ namespace YorkNet {
                 
                 SentMessageToALL(mess ,1);
             }
-            else if(input == "sentFile")
+            else if(input == "sentFileTest")
             {
                 std::cout << "Input ClientID" << std::endl;
                 int id = 0;
@@ -133,13 +133,13 @@ namespace YorkNet {
                     sentFileToSocket(id, "1", "json");
                 }
             }
-            else if(input == "sentFile1")
+            else if(input == "sentFile")
             {
                 std::cout << "Input ClientID" << std::endl;
                 int id = 0;
                 std::cin >> id;
                 
-                sentFileToSocket(id, "1", "png");
+                sentFileToSocket(id, "2", "json");
             }
             
         commandSystem();

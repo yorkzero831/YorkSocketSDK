@@ -166,8 +166,16 @@ namespace YorkNet {
                 fcntl(sockID, F_SETFL,  O_NONBLOCK);
                 if (read(sockID, &contextBuff[buf_Context_Pointer], thisHeader.length) <= 0)
                 {
-                    if (errno == EWOULDBLOCK){ break; }
-                    else{ break; }
+                    if (errno == EWOULDBLOCK)
+                    {
+                        std::cout<< "None Data found";
+                        break;
+                    }
+                    else
+                    {
+                        std::cout<< "Error on read data";
+                        break;
+                    }
                 }
                 //std::cout <<  " Received:" << contextBuff << std::endl;
                 
