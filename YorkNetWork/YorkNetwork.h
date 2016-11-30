@@ -8,10 +8,10 @@
 #ifndef YORKNETWORK_H_
 #define YORKNETWORK_H_
 
-#define DEFULT_PORT         10832
+#define DEFULT_PORT         10833
 #define  MAX_BUFFER_SIZE    2120
 #define HEADER_LENGTH       72
-#define FILE_BUFFER_SIZE    1024
+#define FILE_BUFFER_SIZE    4096
 
 
 
@@ -137,7 +137,7 @@ namespace YorkNet {
         
         char endOfStream    = '\0';
         
-        const std::chrono::milliseconds hearBeatC = std::chrono::milliseconds(30);
+        const std::chrono::milliseconds hearBeatC = std::chrono::milliseconds(10);
         
         char* createBuffer( char *preBuffer, int64_t tag, int64_t numOfBlock = 1,  int64_t indexOfBlock = 1, std::string fileName = "",  FileTypes fileType = FileTypes::NONE, int64_t fileLength = -1);
         

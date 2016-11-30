@@ -110,6 +110,7 @@ namespace YorkNet {
         
         while( (file_block_length = fread(buffer, sizeof(char), FILE_BUFFER_SIZE, fileR)) > 0)
         {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
             thisBlockNum ++;
             
             //std::cout << "file_block_length: " << file_block_length << std::endl;
@@ -128,7 +129,7 @@ namespace YorkNet {
                 bool fixed = false;
                 while (couter <100)
                 {
-                    std::this_thread::sleep_for(hearBeatC);
+                    //std::this_thread::sleep_for(hearBeatC);
                     couter++;
                     if(send(socketID, sentChar, blockLenth+HEADER_LENGTH, 0) < 0 )
                     {
@@ -178,7 +179,7 @@ namespace YorkNet {
         }
         fwrite(inMessage, sizeof(char), header.length, fileToWrite);
         fclose(fileToWrite);
-        delete (inMessage);
+        delete []inMessage;
         std::cout<<"Finsh on save file"<< std::endl;
         
     }

@@ -221,7 +221,7 @@ namespace YorkNet {
                             memcpy(fileDataTotal+filePostionPointer, fileContextList.at(ii).data, fileContextList.at(ii).header.length);
                             filePostionPointer += fileContextList.at(ii).header.length;
                             
-                            delete fileContextList.at(ii).data;
+                            delete[] fileContextList.at(ii).data;
                             //fileDataTotal += fileContextList.at(ii).data;
                         }
                         
