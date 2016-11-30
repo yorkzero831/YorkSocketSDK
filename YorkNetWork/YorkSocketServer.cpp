@@ -127,7 +127,11 @@ namespace YorkNet {
                 int id = 0;
                 std::cin >> id;
                 
-                sentFileToSocket(id, "1", "json");
+                //sentFileToSocket(id, "1", "json");
+                while (1) {
+                    std::this_thread::sleep_for(hearBeatC*100);
+                    sentFileToSocket(id, "1", "json");
+                }
             }
             else if(input == "sentFile1")
             {

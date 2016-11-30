@@ -75,7 +75,7 @@ namespace YorkNet {
         // count fileBlock sent
         int64_t fileSize = getFileSize(fileAbslutPath);
         
-        char *buffer = new char[FILE_BUFFER_SIZE];
+        char buffer[FILE_BUFFER_SIZE];
         
         size_t fileBlockTotal = fileSize/FILE_BUFFER_SIZE;
         if(fileSize%FILE_BUFFER_SIZE > 0)
@@ -124,9 +124,12 @@ namespace YorkNet {
             
             if(send(socketID, sentChar, blockLenth+HEADER_LENGTH, 0) < 0)
             {
+                delete sentChar;
                 std::cout << "Error on sending file"  << std::endl;
                 break;
             }
+            
+            delete sentChar;
             
             bzero(buffer, FILE_BUFFER_SIZE);
             

@@ -209,8 +209,11 @@ namespace YorkNet {
                                 fileContextList.clear();
                                 break;
                             }
+                            
                             memcpy(fileDataTotal+filePostionPointer, fileContextList.at(ii).data, fileContextList.at(ii).header.length);
                             filePostionPointer += fileContextList.at(ii).header.length;
+                            
+                            delete fileContextList.at(ii).data;
                             //fileDataTotal += fileContextList.at(ii).data;
                         }
                         
