@@ -83,7 +83,7 @@ namespace YorkNet {
             }
             else if(input == "sentFile")
             {
-                sentFileToServer("1", "png");
+                sentFileToSocket(sockID, "1", "json");
             }
             input = "";
         }
@@ -110,7 +110,7 @@ namespace YorkNet {
             std::this_thread::sleep_for(hearBeatC);
             
             bool isChecked_header                       = false;
-            bool fileDataBegin                             = false;
+            bool fileDataBegin                          = false;
             
             Header thisHeader;
             
@@ -129,7 +129,12 @@ namespace YorkNet {
                     if (read(sockID, &headerBuff[buf_Pointer], 1) <= 0)
                     {
                         if (errno == EWOULDBLOCK){ break; }
-                        else{ break; }
+                        else
+                        {
+                            std::cout<< "No message comes from server"<<std::endl;
+                            close(sockID);
+                            exit(12);
+                        }
                     }
                     if (buf_Pointer == HEADER_LENGTH-1)
                     {
@@ -164,7 +169,7 @@ namespace YorkNet {
                     if (errno == EWOULDBLOCK){ break; }
                     else{ break; }
                 }
-                std::cout <<  " Received:" << contextBuff << std::endl;
+                //std::cout <<  " Received:" << contextBuff << std::endl;
                 
                 ////call
                 if(!fileDataBegin) didGetMessage(contextBuff, thisHeader);
@@ -188,10 +193,10 @@ namespace YorkNet {
                         {
                             thisfileLength = thisHeader.length;
                         }
-                        //char* fileDataTotal = new char[thisfileLength];
-                        std::string fileDataTotal;
+                        char* fileDataTotal = new char[thisfileLength];
+                        //std::string fileDataTotal;
                         
-                        int64_t totalFileLength = 0;
+                        int64_t filePostionPointer = 0;
                         LOOP(thisHeader.totalBlock)
                         {
                             //Index error
@@ -204,13 +209,14 @@ namespace YorkNet {
                                 fileContextList.clear();
                                 break;
                             }
-                            totalFileLength += fileContextList.at(ii).header.length;
-                            fileDataTotal += fileContextList.at(ii).data;
+                            memcpy(fileDataTotal+filePostionPointer, fileContextList.at(ii).data, fileContextList.at(ii).header.length);
+                            filePostionPointer += fileContextList.at(ii).header.length;
+                            //fileDataTotal += fileContextList.at(ii).data;
                         }
                         
                         ////call
-                        Header outHeader = Header(thisHeader.tag,totalFileLength,1,1);
-                        didGetFile(fileDataTotal.c_str(), outHeader);
+                        Header outHeader = Header(thisHeader.tag,thisfileLength,1,1,"",thisHeader.fileType);
+                        didGetFile(fileDataTotal, outHeader);
                         ////
                         
                         thisFileName = "";
@@ -234,80 +240,6 @@ namespace YorkNet {
         
     }
     
-    void YorkSocketClient::sentFileToServer(std::string fileName, std::string fileType)
-    {
-        std::string filePath       = fileName + "." + fileType;
-        std::string fileAbslutPath = getDirPath(filePath);
-        
-        // count fileBlock sent
-        int64_t fileSize = getFileSize(fileAbslutPath);
-        
-        char *buffer = new char[FILE_BUFFER_SIZE];
-        
-        size_t fileBlockTotal = fileSize/FILE_BUFFER_SIZE;
-        if(fileSize%FILE_BUFFER_SIZE > 0)
-            fileBlockTotal++;
-        
-        FileTypes fileTypeT = getFileType(fileType);
-        
-//        std::ifstream ifs;
-//        ifs.open(fileAbslutPath , std::ios::binary);
-//        char testBuf[FILE_BUFFER_SIZE];
-//        
-//        ifs.read(testBuf, FILE_BUFFER_SIZE);
-//        std::cout << "content: " << testBuf << std::endl;
-        
-        FILE *fileR;
-        
-        if(fileTypeT == FileTypes::TXT || fileTypeT == FileTypes::JSON || fileTypeT == FileTypes::NONE)
-        {
-            fileR = std::fopen(fileAbslutPath.c_str(), "r");
-        }
-        else
-        {
-            fileR = std::fopen(fileAbslutPath.c_str(), "rb");
-        }
-        
-        
-        if(fileR == NULL)
-        {
-            fclose(fileR);
-            std::cout << "Can not OpenFile "<< filePath << std::endl;
-            return;
-        }
-        
-        
-        int thisBlockNum = 0;
-        
-        bzero(buffer, FILE_BUFFER_SIZE);
-        int file_block_length = 0;
-        
-        //char *oo = fgets(buffer, 100, fileR);
-        
-        while( (file_block_length = fread(buffer, sizeof(char), FILE_BUFFER_SIZE, fileR)) > 0)
-        {
-            thisBlockNum ++;
-            
-            std::cout << "file_block_length: " << file_block_length << std::endl;
-            std::cout << "content1: " << buffer << std::endl;
-            
-            char *sentChar = createBuffer(buffer, 2, fileBlockTotal, thisBlockNum, fileName, fileTypeT);
-            int64_t sentLenth = strlen(buffer);
-            
-            if(send(sockID, sentChar, sentLenth + HEADER_LENGTH, 0) < 0)
-            {
-                std::cout << "Error on sending file"  << std::endl;
-                break;
-            }
-            
-            bzero(buffer, FILE_BUFFER_SIZE);
-            
-        }
-        //SentMessageTo(socketID, "",1);
-        
-        fclose(fileR);
-        std::cout << "File: "<< filePath<<" Transfer finished"  << std::endl;
-    }
     
 
 } /* namespace York */

@@ -29,11 +29,9 @@ namespace YorkNet {
 		void StopServer();
 		void SentMessageTo(int socketID, std::string words, int64_t tag, int64_t IOB = 1, int64_t TOB =1);
 		void SentMessageToALL(std::string words, int64_t tag, int64_t IOB = 1, int64_t TOB =1);
-        void SentFileTo(int socketID, std::string fileName, std::string fileType);
 		//virtual void DidRecivedMessage(const int& clientID,const std::string& Addr);
         
-        virtual void didGetMessage(const char *inMessage,const Header &header){};
-        virtual void didGetFile(const char *inMessage,const Header &header);
+        //virtual void didGetMessage(const char *inMessage,const Header &header){};
         
 		
 	private:

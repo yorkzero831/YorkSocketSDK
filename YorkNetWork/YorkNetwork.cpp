@@ -24,11 +24,11 @@ namespace YorkNet {
 		std::cout << message.errorWords << " WITH ERROMESSAGE : " << message.details<<std::endl;
 	}
     
-    char* YorkNetwork::createBuffer( char *preBuffer,  int64_t tag, int64_t numOfBlock,  int64_t indexOfBlock,  std::string fileName,  FileTypes fileType)
+    char* YorkNetwork::createBuffer( char *preBuffer,  int64_t tag, int64_t numOfBlock,  int64_t indexOfBlock,  std::string fileName,  FileTypes fileType, int64_t fileLength)
     {
         int64_t bufferLength;
-        if(fileName == ""){ bufferLength = strlen(preBuffer); }
-        else{ bufferLength =  FILE_BUFFER_SIZE; }
+        if(fileLength == -1){ bufferLength = strlen(preBuffer); }
+        else{ bufferLength =  fileLength; }
         
         char *out               = new char[bufferLength + HEADER_LENGTH];
         int64_t tagTrue         = tag==0?1:tag;
@@ -36,17 +36,18 @@ namespace YorkNet {
         
         memcpy(out, &header, HEADER_LENGTH);
         //int64_t ss = strlen(out);
-        strcpy(out + HEADER_LENGTH, preBuffer);
-        
+        //strcpy(out + HEADER_LENGTH, preBuffer);
+        memcpy(out + HEADER_LENGTH, preBuffer, bufferLength);
+        //strncpy(out + HEADER_LENGTH, preBuffer, bufferLength);
         
         return out;
     }
     
-    char* YorkNetwork::createBuffer(std::string message,  int64_t tag, int64_t numOfBlock, int64_t indexOfBlock,  std::string fileName,  FileTypes fileType)
+    char* YorkNetwork::createBuffer(std::string message,  int64_t tag, int64_t numOfBlock, int64_t indexOfBlock,  std::string fileName,  FileTypes fileType, int64_t fileLength)
     {
         int64_t bufferLength;
-        if(fileName == ""){ bufferLength = message.length(); }
-        else{ bufferLength =  FILE_BUFFER_SIZE; }
+        if(fileLength == -1){ bufferLength = message.length(); }
+        else{ bufferLength =  fileLength; }
         
         char *out               = new char[bufferLength + HEADER_LENGTH];
         int64_t tagTrue         = tag==0?1:tag;
@@ -57,11 +58,104 @@ namespace YorkNet {
         
         const char *messageToChar = message.c_str();
         
-        strcpy(out + HEADER_LENGTH, messageToChar);
+        //strcpy(out + HEADER_LENGTH, messageToChar);
+        memcpy(out + HEADER_LENGTH, messageToChar, bufferLength);
         
         
         return out;
 
+    }
+    
+    //Function called when sent file to socket
+    void YorkNetwork::sentFileToSocket(int socketID, std::string fileName, std::string fileType)
+    {
+        std::string filePath       = fileName + "." + fileType;
+        std::string fileAbslutPath = getDirPath(filePath);
+        
+        // count fileBlock sent
+        int64_t fileSize = getFileSize(fileAbslutPath);
+        
+        char *buffer = new char[FILE_BUFFER_SIZE];
+        
+        size_t fileBlockTotal = fileSize/FILE_BUFFER_SIZE;
+        if(fileSize%FILE_BUFFER_SIZE > 0)
+            fileBlockTotal++;
+        
+        FileTypes fileTypeT = getFileType(fileType);
+        
+        FILE *fileR;
+        
+        if(fileTypeT == FileTypes::TXT || fileTypeT == FileTypes::JSON || fileTypeT == FileTypes::NONE)
+        {
+            fileR = std::fopen(fileAbslutPath.c_str(), "r");
+        }
+        else
+        {
+            fileR = std::fopen(fileAbslutPath.c_str(), "rb");
+        }
+        
+        
+        if(fileR == NULL)
+        {
+            fclose(fileR);
+            std::cout << "Can not OpenFile "<< filePath << std::endl;
+            return;
+        }
+        
+        
+        int thisBlockNum = 0;
+        
+        bzero(buffer, FILE_BUFFER_SIZE);
+        int file_block_length = 0;
+        
+        while( (file_block_length = fread(buffer, sizeof(char), FILE_BUFFER_SIZE, fileR)) > 0)
+        {
+            thisBlockNum ++;
+            
+            //std::cout << "file_block_length: " << file_block_length << std::endl;
+            //std::cout << "content1: " << buffer << std::endl;
+            
+            int64_t blockLenth;
+            if(thisBlockNum < fileBlockTotal){ blockLenth = FILE_BUFFER_SIZE;}
+            else if (thisBlockNum == fileBlockTotal) { blockLenth = fileSize%FILE_BUFFER_SIZE ;}
+            
+            char *sentChar = createBuffer(buffer, 2, fileBlockTotal, thisBlockNum, fileName, fileTypeT, blockLenth);
+            int64_t sentLenth = strlen(buffer);
+            
+            if(send(socketID, sentChar, blockLenth+HEADER_LENGTH, 0) < 0)
+            {
+                std::cout << "Error on sending file"  << std::endl;
+                break;
+            }
+            
+            bzero(buffer, FILE_BUFFER_SIZE);
+            
+        }
+        //SentMessageTo(socketID, "",1);
+        
+        fclose(fileR);
+        std::cout << "File: "<< filePath<<" Transfer finished"  << std::endl;
+    }
+    
+    //Fuction called when file did all recived
+    void YorkNetwork::didGetFile(const char *inMessage, const YorkNet::YorkNetwork::Header &header)
+    {
+        std::string fileName = "temp" + getStringByFileType(header.fileType);
+        
+        FILE *fileToWrite;
+        if(header.fileType == FileTypes::TXT || header.fileType == FileTypes::JSON || header.fileType == FileTypes::NONE)
+        {
+            fileToWrite = fopen(getDirPath(fileName).c_str(), "w+");
+        }
+        else
+        {
+            fileToWrite = fopen(getDirPath(fileName).c_str(), "wb");
+        }
+        fwrite(inMessage, sizeof(char), header.length, fileToWrite);
+        fclose(fileToWrite);
+        delete (inMessage);
+        std::cout<<"Finsh on save file"<< std::endl;
+        
     }
 
     
@@ -174,5 +268,7 @@ namespace YorkNet {
         }
         return out;
     }
+    
+    
 
 } /* namespace York */

@@ -8,7 +8,7 @@
 #ifndef YORKNETWORK_H_
 #define YORKNETWORK_H_
 
-#define DEFULT_PORT         10833
+#define DEFULT_PORT         10832
 #define  MAX_BUFFER_SIZE    2120
 #define HEADER_LENGTH       72
 #define FILE_BUFFER_SIZE    4096
@@ -139,17 +139,22 @@ namespace YorkNet {
         
         const std::chrono::milliseconds hearBeatC = std::chrono::milliseconds(10);
         
-        char* createBuffer( char *preBuffer, int64_t tag, int64_t numOfBlock = 1,  int64_t indexOfBlock = 1, std::string fileName = "",  FileTypes fileType = FileTypes::NONE);
+        char* createBuffer( char *preBuffer, int64_t tag, int64_t numOfBlock = 1,  int64_t indexOfBlock = 1, std::string fileName = "",  FileTypes fileType = FileTypes::NONE, int64_t fileLength = -1);
         
-        char* createBuffer(std::string message, int64_t tag, int64_t numOfBlock = 1, int64_t indexOfBlock = 1, std::string fileName = "", FileTypes fileType = FileTypes::NONE);
+        char* createBuffer(std::string message, int64_t tag, int64_t numOfBlock = 1, int64_t indexOfBlock = 1, std::string fileName = "", FileTypes fileType = FileTypes::NONE, int64_t fileLength = -1);
         
         //char* createBuffer( char *preBuffer,  int64_t tag, int64_t numOfBlock = 1,  int64_t indexOfBlock = 1,  std::string fileName = "",  FileTypes fileType = FileTypes::NONE);
         
         size_t getFileSize(const std::string& fileName);
         
+        void sentFileToSocket(int socketID, std::string fileName, std::string fileType);
+        
+        virtual void didGetFile(const char *inMessage,const Header &header);
+
         
         
-        virtual void didGetMessage(const char *inMessage,const Header &header){};
+        
+        virtual void didGetMessage(const char *inMessage,const Header &header){std::cout<< inMessage <<std::endl;};
         
 //    private:
         
