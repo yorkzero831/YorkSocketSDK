@@ -11,7 +11,7 @@
 #define DEFULT_PORT         10833
 #define  MAX_BUFFER_SIZE    2120
 #define HEADER_LENGTH       72
-#define FILE_BUFFER_SIZE    4096
+#define FILE_BUFFER_SIZE    8192
 
 
 

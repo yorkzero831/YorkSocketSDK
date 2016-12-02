@@ -110,7 +110,7 @@ namespace YorkNet {
         
         while( (file_block_length = fread(buffer, sizeof(char), FILE_BUFFER_SIZE, fileR)) > 0)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            
             thisBlockNum ++;
             
             //std::cout << "file_block_length: " << file_block_length << std::endl;
@@ -123,32 +123,56 @@ namespace YorkNet {
             char *sentChar = createBuffer(buffer, 2, fileBlockTotal, thisBlockNum, fileName, fileTypeT, blockLenth);
             int64_t sentLenth = strlen(buffer);
             
+            fcntl(socketID, F_SETFL,  O_NONBLOCK);
             if(send(socketID, sentChar, blockLenth+HEADER_LENGTH, 0) < 0)
             {
-                int couter = 0;
                 bool fixed = false;
-                while (couter <100)
-                {
-                    //std::this_thread::sleep_for(hearBeatC);
-                    couter++;
-                    if(send(socketID, sentChar, blockLenth+HEADER_LENGTH, 0) < 0 )
+                switch (errno) {
+                    case EBADF:
+                        std::cout << "An invalid descriptor was specified."  << std::endl;
+                        break;
+                    case ECONNRESET:
+                        std::cout << "Connection reset by peer."  << std::endl;
+                        break;
+                    case EDESTADDRREQ:
+                        std::cout << "The socket is not connection-mode, and no peer address is set."  << std::endl;
+                        break;
+                    case EFAULT:
+                        std::cout << "An invalid user space address was specified for an argument."  << std::endl;
+                        break;
+                    case EINTR:
+                        std::cout << "A signal occurred before any data was transmitted"  << std::endl;
+                        break;
+                    case EMSGSIZE:
+                        std::cout << "The socket type requires that message be sent atomically, and the size of the message to be sent made this impossible."  << std::endl;
+                        break;
+                    case ENOBUFS:
+                        std::cout << "The output queue for a network interface was full. This generally indicates that the interface has stopped sending, but may be caused by transient congestion. (Normally, this does not occur in Linux. Packets are just silently dropped when a device queue overflows.)"  << std::endl;
+                        break;
+                    case ENOMEM:
+                        std::cout << "No memory available."  << std::endl;
+                        break;
+                    case EAGAIN:
                     {
-                        std::cout<<"Fixing"<<std::endl;
-                        continue;
-                    }
-                    else
-                    {
+                        //std::cout << "The socket is marked nonblocking and the requested operation would block"  << std::endl;
+                        while(send(socketID, sentChar, blockLenth+HEADER_LENGTH, 0) < 0)
+                        {
+                            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                            std::cout << "fixing"  << std::endl;
+                        }
                         fixed = true;
                         break;
                     }
+                    case EACCES:
+                        std::cout << "Write permission is denied on the destination socket file, or search permission is denied for one of the directories the path prefix. "  << std::endl;
+                        break;
+
                 }
-                
-                if(!fixed)
-                {
-                    delete sentChar;
-                    std::cout << "Error on sending file"  << std::endl;
-                    break;
-                }
+                if(fixed) continue;
+
+                delete sentChar;
+                std::cout << "Error on sending file"  << std::endl;
+                break;
                 
             }
             

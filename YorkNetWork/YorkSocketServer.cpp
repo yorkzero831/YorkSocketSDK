@@ -139,7 +139,7 @@ namespace YorkNet {
                 int id = 0;
                 std::cin >> id;
                 
-                sentFileToSocket(id, "2", "json");
+                sentFileToSocket(id, "3", "json");
             }
             
         commandSystem();
