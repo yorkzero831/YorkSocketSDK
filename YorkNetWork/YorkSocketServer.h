@@ -12,8 +12,7 @@
 #define  MAXCLIENTNUM 10
 
 #include"YorkNetwork.h"
-#include <map>
-#include <vector>
+
 
 //using namespace::std;
 

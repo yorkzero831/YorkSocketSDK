@@ -257,7 +257,7 @@ namespace YorkNet {
                 //std::cout <<  "Received From "<< key << " : "<< contextBuff << std::endl;
                 
                 ////call
-                if(!fileDataBegin) didGetMessage(contextBuff, thisHeader);
+                if(!fileDataBegin) didGetMessage(contextBuff);
                 ////
                 
                 if(fileDataBegin && thisFileName == thisHeader.fileName && thisFileType == thisHeader.fileType)
@@ -336,7 +336,7 @@ namespace YorkNet {
 //		unsigned long sentSize = words.size();
 //		char sentChar[sentSize + 1];
 //        sentChar[sentSize] = endOfStream;
-        char *sentChar = createBuffer(words, tag, TOB, IOB);
+        char *sentChar = createBuffer(words);
         int64_t size = words.length();
         
 		//strcpy(sentChar, words.c_str());
@@ -359,7 +359,7 @@ namespace YorkNet {
 	{
         std::vector<std::string> needToDelete =  std::vector<std::string>();
         
-        char *sentChar = createBuffer(words, tag, TOB, IOB);
+        char *sentChar = createBuffer(words);
         int64_t size = words.length();
 
         std::map<std::string, int>::iterator it;

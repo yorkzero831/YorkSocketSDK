@@ -51,7 +51,7 @@ namespace YorkNet {
         if(connect(sockID, (struct sockaddr *) &server_addr, sizeof(server_addr))<0)
             std::cout<< "Error connecting to "<< ip <<" at port "<< portNo<< std::endl;
         
-        waitMesThread = std::thread(&YorkNet::YorkSocketClient::readFromServer, this);
+        waitMesThread = std::thread(&YorkNet::YorkSocketClient::readFromSocket, this, sockID);
         waitMesThread.detach();
         
         cmdSysThread = std::thread(&YorkNet::YorkSocketClient::commandSystem, this);
@@ -91,7 +91,7 @@ namespace YorkNet {
     
     void YorkSocketClient::writeToServer(std::string message, int64_t tag, int64_t IOB, int64_t TOB)
     {
-        char *sentChar = createBuffer(message, tag, TOB, IOB);
+        char *sentChar = createBuffer(message);
         int64_t size = message.length();
         
         //strcpy(sentChar, words.c_str());
@@ -180,7 +180,7 @@ namespace YorkNet {
                 //std::cout <<  " Received:" << contextBuff << std::endl;
                 
                 ////call
-                if(!fileDataBegin) didGetMessage(contextBuff, thisHeader);
+                if(!fileDataBegin) didGetMessage(contextBuff);
                 ////
                 
                 if(fileDataBegin && thisFileName == thisHeader.fileName && thisFileType == thisHeader.fileType)
