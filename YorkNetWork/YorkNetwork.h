@@ -8,12 +8,13 @@
 #ifndef YORKNETWORK_H_
 #define YORKNETWORK_H_
 
-#define DEFULT_PORT             10833
+#define DEFULT_PORT             10832
 #define  MAX_BUFFER_SIZE        2120
 #define HEADER_LENGTH           72
-#define FILE_BUFFER_SIZE        8192
-#define CHECKER_HEADER_LENGTH   4
+#define FILE_BUFFER_SIZE        100000
+#define CHECKER_HEADER_LENGTH   12
 #define MESSAGE_HEADER_LENGTH   16
+#define SENTING_FILE_H_LENGTH   24
 
 #define TIMEOUT                 5000
 
@@ -98,13 +99,16 @@ namespace YorkNet {
         
         struct CheckerHeader
         {
+            int64_t begin;
             HeaderType headerType;
             CheckerHeader(const HeaderType &inType)
             {
+                begin = 10001;
                 headerType = inType;
             }
             CheckerHeader()
             {
+                begin = 10001;
                 headerType = HeaderType::CHECKER_TYPE;
             }
         };
@@ -188,11 +192,23 @@ namespace YorkNet {
         
         struct SentingFile
         {
+            int64_t begin;
+            int64_t fileID;
             int64_t blockIndex;
             
-            SentingFile(const int64_t &i)
+            SentingFile(const int64_t &Id ,const int64_t &i)
             {
+                begin      = 10001;
+                fileID     = Id;
                 blockIndex = i;
+                //blockCount = c;
+            }
+            
+            SentingFile()
+            {
+                begin      = 10001;
+                fileID     = -1;
+                blockIndex = -1;
                 //blockCount = c;
             }
         };
@@ -206,9 +222,15 @@ namespace YorkNet {
                 header  = h;
                 data    = d;
             }
+            RecivedData()
+            {
+                header = Header();
+                data   = nullptr;
+            }
             
             ~RecivedData()
             {
+                data = new char[0];
                 delete[] data;
             }
         };
@@ -225,26 +247,34 @@ namespace YorkNet {
         //Ceate Buffer For MessageType
         char* createBuffer(const std::string &message);
         
+        //Ceate Buffer For sentingFile
+        char* createBuffer(const SentingFile &thisSentingFile);
+        
         
         size_t getFileSize(const std::string& fileName);
         
         void sentFileToSocket(int socketID, std::string fileName, std::string fileType);
         
-        void readFromSocket(const int &socketID);
+        virtual void readFromSocket(const int &socketID);
         
-        int readMessage(const int &socketID);
+        virtual int readMessage(const int &socketID);
         
-        int readFile(const int &socketID, int *indexOfCheckedBlock);
+        virtual int readFile(const int &socketID, int *indexOfCheckedBlock);
         
-        int readFileConformer(const int &socketID, int *indexOfCheckedBlock, std::string *fileName);
+        virtual int readFileConformer(const int &socketID);
         
         virtual void didGetFile(const char *inMessage,const Header &header);
         
         virtual void didGetMessage(const char *inMessage){std::cout<< inMessage <<std::endl;};
         
+        void getError(size_t error);
+        
     private:
         
-        std::map<int, SentingFile> _sentingFiles = std::map<int, SentingFile>();
+        int64_t _fileID = 0;
+        
+        std::map<std::string, SentingFile> _sentingFiles = std::map<std::string, SentingFile>();
+        std::map<std::string, SentingFile> _recivingFiles = std::map<std::string, SentingFile>();
         
         std::string getDirPath(std::string ins);
         
@@ -258,6 +288,6 @@ namespace YorkNet {
     
     
 
-} 
+}
 
 #endif /* YORKNETWORK_H_ */

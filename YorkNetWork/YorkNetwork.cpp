@@ -66,9 +66,23 @@ namespace YorkNet {
         return out;
     }
     
+    char* YorkNetwork::createBuffer(const SentingFile &thisSentingFile)
+    {
+        char *out = new char[CHECKER_HEADER_LENGTH + SENTING_FILE_H_LENGTH];
+        CheckerHeader cekHeader = CheckerHeader(HeaderType::FILE_CONFORMER);
+        
+        memcpy(out, &cekHeader , CHECKER_HEADER_LENGTH);
+        
+        memcpy(out + CHECKER_HEADER_LENGTH, &thisSentingFile, SENTING_FILE_H_LENGTH);
+        
+        return out;
+    }
+    
     //Function called when sent file to socket
     void YorkNetwork::sentFileToSocket(int socketID, std::string fileName, std::string fileType)
     {
+        bool isFirstTime =true;
+        
         std::string filePath       = fileName + "." + fileType;
         std::string fileAbslutPath = getDirPath(filePath);
         
@@ -103,82 +117,66 @@ namespace YorkNet {
         }
         
         
-        int thisBlockNum = 0;
+        int64_t thisBlockNum = 0;
         
         bzero(buffer, FILE_BUFFER_SIZE);
         int file_block_length = 0;
+
+        
+        _fileID++;
+        //put this file into sentingFile list
+        std::string fileUniName = "local_file_" + std::to_string(_fileID);
+        
         
         while( (file_block_length = fread(buffer, sizeof(char), FILE_BUFFER_SIZE, fileR)) > 0)
         {
             
-            thisBlockNum ++;
+            //std::this_thread::sleep_for(hearBeatC);
             
             //std::cout << "file_block_length: " << file_block_length << std::endl;
             //std::cout << "content1: " << buffer << std::endl;
+            thisBlockNum ++;
+            
+            if(!isFirstTime)
+            {
+                while ( _sentingFiles[fileUniName].blockIndex - thisBlockNum != -1)
+                {
+                    std::this_thread::sleep_for(hearBeatC/10);
+                }
+            }
+            else
+            {
+                SentingFile thisSentingFile = SentingFile(_fileID,-1);
+                _sentingFiles.insert(std::pair<std::string,SentingFile>(fileUniName,thisSentingFile));
+                isFirstTime = false;
+            }
+            
+            
             
             int64_t blockLenth;
             if(thisBlockNum < fileBlockTotal){ blockLenth = FILE_BUFFER_SIZE;}
             else if (thisBlockNum == fileBlockTotal) { blockLenth = fileSize%FILE_BUFFER_SIZE ;}
             
-            char *sentChar = createBuffer(buffer, 2, fileBlockTotal, thisBlockNum, fileName, fileTypeT, blockLenth);
+            char *sentChar = createBuffer(buffer, _fileID, fileBlockTotal, thisBlockNum, fileName, fileTypeT, blockLenth);
             int64_t sentLenth = strlen(buffer);
             
             fcntl(socketID, F_SETFL,  O_NONBLOCK);
-            if(send(socketID, sentChar, blockLenth+HEADER_LENGTH, 0) < 0)
+            if(send(socketID, sentChar, blockLenth + HEADER_LENGTH + CHECKER_HEADER_LENGTH, 0) < 0)
             {
-                bool fixed = false;
-                switch (errno) {
-                    case EBADF:
-                        std::cout << "An invalid descriptor was specified."  << std::endl;
-                        break;
-                    case ECONNRESET:
-                        std::cout << "Connection reset by peer."  << std::endl;
-                        break;
-                    case EDESTADDRREQ:
-                        std::cout << "The socket is not connection-mode, and no peer address is set."  << std::endl;
-                        break;
-                    case EFAULT:
-                        std::cout << "An invalid user space address was specified for an argument."  << std::endl;
-                        break;
-                    case EINTR:
-                        std::cout << "A signal occurred before any data was transmitted"  << std::endl;
-                        break;
-                    case EMSGSIZE:
-                        std::cout << "The socket type requires that message be sent atomically, and the size of the message to be sent made this impossible."  << std::endl;
-                        break;
-                    case ENOBUFS:
-                        std::cout << "The output queue for a network interface was full. This generally indicates that the interface has stopped sending, but may be caused by transient congestion. (Normally, this does not occur in Linux. Packets are just silently dropped when a device queue overflows.)"  << std::endl;
-                        break;
-                    case ENOMEM:
-                        std::cout << "No memory available."  << std::endl;
-                        break;
-                    case EAGAIN:
-                    {
-                        //std::cout << "The socket is marked nonblocking and the requested operation would block"  << std::endl;
-                        while(send(socketID, sentChar, blockLenth+HEADER_LENGTH, 0) < 0)
-                        {
-                            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-                            std::cout << "fixing"  << std::endl;
-                        }
-                        fixed = true;
-                        break;
-                    }
-                    case EACCES:
-                        std::cout << "Write permission is denied on the destination socket file, or search permission is denied for one of the directories the path prefix. "  << std::endl;
-                        break;
-
-                }
-                if(fixed) continue;
+                getError(errno);
 
                 delete sentChar;
                 std::cout << "Error on sending file"  << std::endl;
                 break;
                 
             }
+            std::cout <<  "===========Send "<< thisBlockNum<<":"<< fileBlockTotal<< std::endl;
             
             delete sentChar;
             
             bzero(buffer, FILE_BUFFER_SIZE);
+            
+            
             
         }
         //SentMessageTo(socketID, "",1);
@@ -212,18 +210,32 @@ namespace YorkNet {
                         exit(12);
                     }
                 }
+                
+                size_t error;
+                
                 if (buf_Pointer == CHECKER_HEADER_LENGTH-1)
                 {
                     memcpy(&checkHeader, chectHeaderBuff, CHECKER_HEADER_LENGTH);
+                    if(checkHeader.begin != 10001){ break; }
+                    
+                    std::cout<<"Get Checker : "<<checkHeader.headerType<<std::endl;
                     switch (checkHeader.headerType) {
                         case HeaderType::MESSAGES_TYPE :
                         {
-                            readMessage(socketID);
+                            error = readMessage(socketID);
+                            getError(error);
                             break;
                         }
                         case HeaderType::FILE_TYPE :
                         {
-                            readFile(socketID, checkedFileConformer);
+                            error = readFile(socketID, checkedFileConformer);
+                            getError(error);
+                            break;
+                        }
+                        case HeaderType::FILE_CONFORMER :
+                        {
+                            error = readFileConformer(socketID);
+                            getError(error);
                             break;
                         }
    
@@ -243,6 +255,7 @@ namespace YorkNet {
         MessageHeader messageHeader;
         char *messageContexBuff                         = nullptr;
         
+        fcntl(socketID, F_SETFL,  O_NONBLOCK);
         if (read(socketID, &MessageHeaderBuff[0], MESSAGE_HEADER_LENGTH) <= 0)
         {
             if (errno == EWOULDBLOCK)
@@ -266,7 +279,8 @@ namespace YorkNet {
         
         messageContexBuff = new char[messageHeader.length];
         
-        if (read(socketID, &messageContexBuff[0], MESSAGE_HEADER_LENGTH) <= 0)
+        fcntl(socketID, F_SETFL,  O_NONBLOCK);
+        if (read(socketID, &messageContexBuff[0], messageHeader.length) <= 0)
         {
             if (errno == EWOULDBLOCK)
             {
@@ -292,18 +306,55 @@ namespace YorkNet {
     {
         std::vector<RecivedData>fileContextList     = std::vector<RecivedData>();
         char headerBuff[HEADER_LENGTH]              = { 0 };
-        char *contextBuff                           = nullptr;
+        char checkerBuff[CHECKER_HEADER_LENGTH]     = { 0 };
+        char *contextBuff                           = new char[0];
         //bool headerChecked                          = false;
         bool fileDataBegin                          = false;
-        int lastBlockIndex                          = -1;
+        int64_t lastBlockIndex                      = 0;
         std::string thisFileName                    = "";
         FileTypes   thisFileType                    = FileTypes::NONE;
         
         Header thisHeader;
+        CheckerHeader checkHeader;
+        
+        std::string fileUniName                            = "";
+        size_t buf_Pointer                                 = 0;
         
         while (1)
         {
+            //std::this_thread::sleep_for(hearBeatC);
+            if(fileDataBegin)
+            {
+                //std::this_thread::sleep_for(hearBeatC);
+                buf_Pointer = 0;
+                while (buf_Pointer < CHECKER_HEADER_LENGTH)
+                {
+                    std::this_thread::sleep_for(hearBeatC/3);
+                    fcntl(socketID, F_SETFL,  O_NONBLOCK);
+                    if (read(socketID, &checkerBuff[buf_Pointer], 1) <= 0)
+                    {
+                        if (errno == EWOULDBLOCK){ continue; }
+                        else
+                        {
+                            std::cout<< "No message comes from server"<<std::endl;
+                            //close(socketID);
+                            return -1001;
+                        }
+                    }
+                    //std::this_thread::sleep_for(hearBeatC/10);
+                    if (buf_Pointer == CHECKER_HEADER_LENGTH-1)
+                    {
+                        memcpy(&checkHeader, checkerBuff, CHECKER_HEADER_LENGTH);
+                        if(checkHeader.headerType != HeaderType::FILE_TYPE)
+                        {
+                            return -1001;
+                        }
+                    }
+                    buf_Pointer++;
+                }
+            }
             
+            fcntl(socketID, F_SETFL,  O_NONBLOCK);
             if (read(socketID, &headerBuff[0], HEADER_LENGTH) <= 0)
             {
                 if (errno == EWOULDBLOCK)
@@ -316,24 +367,30 @@ namespace YorkNet {
                 else
                 {
                     std::cout<< "Error On Read FileHeader Data"<<std::endl;
-                    DELETE_CHARS_VECTOR(fileContextList);
                     delete[] contextBuff;
                     return errno;
                 }
             }
             
             memcpy(&thisHeader, headerBuff, HEADER_LENGTH);
-            if(thisHeader.begin!=1001 || thisHeader.length < 0 || thisHeader.totalBlock < thisHeader.indexOfBlock)
+            if(thisHeader.begin!=10001 || thisHeader.length < 0 || thisHeader.totalBlock < thisHeader.indexOfBlock)
             {
                 delete[] contextBuff;
                 return -1001;
             }
             
-            if(thisHeader.fileName != "" && !fileDataBegin )
+            if(thisHeader.fileName != "")
             {
-                fileDataBegin   = true;
-                thisFileName    = thisHeader.fileName;
-                thisFileType    = thisHeader.fileType;
+                if( !fileDataBegin )
+                {
+                    fileDataBegin   = true;
+                    thisFileName    = thisHeader.fileName;
+                    thisFileType    = thisHeader.fileType;
+                    
+                    fileUniName = std::to_string(socketID) + "_" + std::to_string(thisHeader.tag);
+                    SentingFile thisRecivingOne = SentingFile(thisHeader.tag, thisHeader.indexOfBlock);
+                    _recivingFiles.insert(std::pair<std::string, SentingFile>(fileUniName, thisRecivingOne));
+                }
             }
             else
             {
@@ -362,13 +419,39 @@ namespace YorkNet {
             
             if(fileDataBegin && thisFileName == thisHeader.fileName && thisFileType == thisHeader.fileType)
             {
-                if(lastBlockIndex - thisHeader.indexOfBlock != -1)
+                if(lastBlockIndex > thisHeader.indexOfBlock)
                 {
                     delete[] contextBuff;
                     return -1001;
                 }
                 
+                lastBlockIndex = thisHeader.indexOfBlock;
+                
                 fileContextList.push_back(RecivedData(thisHeader,contextBuff));
+                std::cout <<  "===========Received "<< thisHeader.indexOfBlock<<":"<<thisHeader.totalBlock << std::endl;
+                //std::cout << "content : "<< contextBuff<<std::endl;
+                
+                SentingFile thisRecivedOne = SentingFile(thisHeader.tag,thisHeader.indexOfBlock);
+                char* fileConformer = createBuffer(thisRecivedOne);
+                
+                //std::this_thread::sleep_for(hearBeatC);
+                fcntl(socketID, F_SETFL,  O_NONBLOCK);
+                if (send(socketID, fileConformer, HEADER_LENGTH + SENTING_FILE_H_LENGTH, 0) < 0)
+                {
+                    if (errno == EWOULDBLOCK)
+                    {
+                        std::cout<< "File Conformer Error1"<<std::endl;
+                        delete[] contextBuff;
+                        return errno;
+                    }
+                    else
+                    {
+                        std::cout<< "File Conformer Error2"<<std::endl;
+                        delete[] contextBuff;
+                        return errno;;
+                    }
+                }
+                //std::cout <<  "===========Will Receive "<< thisHeader.indexOfBlock<<":"<<thisHeader.totalBlock<< std::endl;
                 
                 if(thisHeader.indexOfBlock == thisHeader.totalBlock)
                 {
@@ -400,15 +483,18 @@ namespace YorkNet {
                         memcpy(fileDataTotal+filePostionPointer, fileContextList.at(ii).data, fileContextList.at(ii).header.length);
                         filePostionPointer += fileContextList.at(ii).header.length;
                         
-                        delete[] fileContextList.at(ii).data;
-                        Header outHeader = Header(thisHeader.tag,thisfileLength,1,1,"",thisHeader.fileType);
-                        didGetFile(fileDataTotal, outHeader);
+                        //delete[] fileContextList.at(ii).data;
                         
-                        fileContextList.clear();
+                        
+                        //fileContextList.clear();
                     }
+                    Header outHeader = Header(thisHeader.tag,thisfileLength,1,1,"",thisHeader.fileType);
+                    didGetFile(fileDataTotal, outHeader);
+                    
+                    _recivingFiles.clear();
                     
                     fileContextList.clear();
-                    delete[] contextBuff;
+                    //delete[] contextBuff;
                     return 0;
                     
                 }
@@ -425,8 +511,45 @@ namespace YorkNet {
         return 0;
     }
     
-    int YorkNetwork::readFileConformer(const int &socketID, int *indexOfCheckedBlock, std::string *fileName)
+    int YorkNetwork::readFileConformer(const int &socketID)
     {
+        char fileConfomerBuff[SENTING_FILE_H_LENGTH];
+        SentingFile thisSentingFile;
+        
+        fcntl(socketID, F_SETFL,  O_NONBLOCK);
+        if (read(socketID, fileConfomerBuff, SENTING_FILE_H_LENGTH) <= 0)
+        {
+            if (errno == EWOULDBLOCK)
+            {
+                std::cout<< "None checkerHeader Data Found"<<std::endl;
+                return errno;
+                //break;
+            }
+            else
+            {
+                std::cout<< "Error On Read checkerHeader Data"<<std::endl;
+                return errno;
+            }
+        }
+        
+        memcpy(&thisSentingFile, fileConfomerBuff, SENTING_FILE_H_LENGTH);
+        
+        // to download next block
+        //thisSentingFile.blockIndex ++;
+        
+        std::cout<<"target has recived "<<thisSentingFile.blockIndex<<std::endl;
+        
+        std::string fileUniName = "local_file_" + std::to_string(thisSentingFile.fileID);
+        if(_sentingFiles.find(fileUniName) != _sentingFiles.end())
+        {
+            _sentingFiles[fileUniName] = thisSentingFile;
+        }
+        else
+        {
+            std::cout<< "Error On Checking Senting List"<<std::endl;
+        }
+        //if(_sentingFiles)
+        
         return 0;
     }
     
@@ -449,6 +572,46 @@ namespace YorkNet {
         delete []inMessage;
         std::cout<<"Finsh on save file"<< std::endl;
         
+    }
+    
+    void YorkNetwork::getError(size_t error)
+    {
+        switch (error) {
+            case EBADF:
+                std::cout << "An invalid descriptor was specified."  << std::endl;
+                break;
+            case ECONNRESET:
+                std::cout << "Connection reset by peer."  << std::endl;
+                break;
+            case EDESTADDRREQ:
+                std::cout << "The socket is not connection-mode, and no peer address is set."  << std::endl;
+                break;
+            case EFAULT:
+                std::cout << "An invalid user space address was specified for an argument."  << std::endl;
+                break;
+            case EINTR:
+                std::cout << "A signal occurred before any data was transmitted"  << std::endl;
+                break;
+            case EMSGSIZE:
+                std::cout << "The socket type requires that message be sent atomically, and the size of the message to be sent made this impossible."  << std::endl;
+                break;
+            case ENOBUFS:
+                std::cout << "The output queue for a network interface was full. This generally indicates that the interface has stopped sending, but may be caused by transient congestion. (Normally, this does not occur in Linux. Packets are just silently dropped when a device queue overflows.)"  << std::endl;
+                break;
+            case ENOMEM:
+                std::cout << "No memory available."  << std::endl;
+                break;
+            case EAGAIN:
+            {
+                std::cout << "The socket is marked nonblocking and the requested operation would block"  << std::endl;
+                break;
+            }
+            case EACCES:
+                std::cout << "Write permission is denied on the destination socket file, or search permission is denied for one of the directories the path prefix. "  << std::endl;
+                break;
+                
+        }
+
     }
 
     
@@ -521,7 +684,6 @@ namespace YorkNet {
         }
         return out;
     }
-    
     
 
 } /* namespace York */

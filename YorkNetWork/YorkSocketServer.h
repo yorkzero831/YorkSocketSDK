@@ -50,10 +50,12 @@ namespace YorkNet {
         
         std::map<int, std::thread*> waitingMessageThreads;
         std::map<std::string, int> clients = std::map<std::string, int>();
+        std::map<int, std::string> clientSockets = std::map<int, std::string>();
 
 		void bindServer();
 		void runServer();
         void waitingMessage(int socketID, std::string key);
+        void ListenToClient(int socketID, std::string key);
         void commandSystem();
         
         

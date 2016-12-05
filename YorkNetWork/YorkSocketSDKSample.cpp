@@ -14,8 +14,11 @@ using namespace YorkNet;
 
 int main() {
     
-    int64_t ooo = sizeof(YorkNet::YorkNetwork::MessageHeader);
+    int64_t ooo = sizeof(YorkNet::YorkNetwork::SentingFile);
     char aa[] = "wwwsss";
+    
+    char *oooo = new char[100];
+    delete[] oooo;
     
 	YorkSocketServer myserver;
 	myserver.StartServer();
