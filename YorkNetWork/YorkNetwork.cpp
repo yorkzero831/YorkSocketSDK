@@ -218,7 +218,7 @@ namespace YorkNet {
                     memcpy(&checkHeader, chectHeaderBuff, CHECKER_HEADER_LENGTH);
                     if(checkHeader.begin != 10001){ break; }
                     
-                    std::cout<<"Get Checker : "<<checkHeader.headerType<<std::endl;
+                    //std::cout<<"Get Checker : "<<checkHeader.headerType<<std::endl;
                     switch (checkHeader.headerType) {
                         case HeaderType::MESSAGES_TYPE :
                         {

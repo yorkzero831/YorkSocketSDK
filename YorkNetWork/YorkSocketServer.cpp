@@ -223,6 +223,7 @@ namespace YorkNet {
                 if (buf_Pointer == CHECKER_HEADER_LENGTH-1)
                 {
                     memcpy(&checkHeader, chectHeaderBuff, CHECKER_HEADER_LENGTH);
+                    if(checkHeader.begin != 10001){ break; }
                     switch (checkHeader.headerType)
                     {
                         case HeaderType::MESSAGES_TYPE :
@@ -234,6 +235,12 @@ namespace YorkNet {
                         case HeaderType::FILE_TYPE :
                         {
                             error = readFile(socketID, checkedFileConformer);
+                            getError(error);
+                            break;
+                        }
+                        case HeaderType::FILE_CONFORMER :
+                        {
+                            error = readFileConformer(socketID);
                             getError(error);
                             break;
                         }
