@@ -254,7 +254,7 @@ namespace YorkNet {
         }
 
     }
-    
+    /*
     void YorkSocketServer::waitingMessage(int socketID, std::string key)
     {
         std::cout<<"Waiting Message For "<<key<<std::endl;
@@ -398,7 +398,7 @@ namespace YorkNet {
             
         }
     }
-
+     */
 	void YorkSocketServer::StopServer()
 	{
 		close(listenSocket);

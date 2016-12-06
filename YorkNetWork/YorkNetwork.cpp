@@ -165,14 +165,14 @@ namespace YorkNet {
             {
                 getError(errno);
 
-                delete sentChar;
+                delete[] sentChar;
                 std::cout << "Error on sending file"  << std::endl;
                 break;
                 
             }
             std::cout <<  "===========Send "<< thisBlockNum<<":"<< fileBlockTotal<< std::endl;
             
-            delete sentChar;
+            delete[] sentChar;
             
             bzero(buffer, FILE_BUFFER_SIZE);
             
@@ -180,6 +180,7 @@ namespace YorkNet {
             
         }
         //SentMessageTo(socketID, "",1);
+        _sentingFiles.erase(fileUniName);
         
         fclose(fileR);
         std::cout << "File: "<< filePath<<" Transfer finished"  << std::endl;
@@ -491,7 +492,7 @@ namespace YorkNet {
                     Header outHeader = Header(thisHeader.tag,thisfileLength,1,1,"",thisHeader.fileType);
                     didGetFile(fileDataTotal, outHeader);
                     
-                    _recivingFiles.clear();
+                    _recivingFiles.erase(fileUniName);
                     
                     fileContextList.clear();
                     //delete[] contextBuff;
@@ -537,7 +538,7 @@ namespace YorkNet {
         // to download next block
         //thisSentingFile.blockIndex ++;
         
-        std::cout<<"target has recived "<<thisSentingFile.blockIndex<<std::endl;
+        //std::cout<<"target has recived "<<thisSentingFile.blockIndex<<std::endl;
         
         std::string fileUniName = "local_file_" + std::to_string(thisSentingFile.fileID);
         if(_sentingFiles.find(fileUniName) != _sentingFiles.end())
@@ -546,7 +547,8 @@ namespace YorkNet {
         }
         else
         {
-            std::cout<< "Error On Checking Senting List"<<std::endl;
+            if(_sentingFiles.size() != 0)
+                std::cout<< "Error On Checking Senting List"<<std::endl;
         }
         //if(_sentingFiles)
         

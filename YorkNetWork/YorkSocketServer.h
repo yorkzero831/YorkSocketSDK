@@ -54,7 +54,7 @@ namespace YorkNet {
 
 		void bindServer();
 		void runServer();
-        void waitingMessage(int socketID, std::string key);
+        //void waitingMessage(int socketID, std::string key);
         void ListenToClient(int socketID, std::string key);
         void commandSystem();
         
