@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		061A99E11DEECA4D005C727A /* 1.png in Copy Files */ = {isa = PBXBuildFile; fileRef = 061A99E01DEECA43005C727A /* 1.png */; };
+		0669846D1DF7F8DC0092344A /* fileList.txt in Copy Files */ = {isa = PBXBuildFile; fileRef = 0669846C1DF7F8D70092344A /* fileList.txt */; };
 		06AC16351DE5705900421FF8 /* YorkNetwork.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06AC16301DE5705900421FF8 /* YorkNetwork.cpp */; };
 		06AC16361DE5705900421FF8 /* YorkSocketSDKSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06AC16321DE5705900421FF8 /* YorkSocketSDKSample.cpp */; };
 		06AC16371DE5705900421FF8 /* YorkSocketServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06AC16331DE5705900421FF8 /* YorkSocketServer.cpp */; };
@@ -24,6 +25,7 @@
 			dstPath = file;
 			dstSubfolderSpec = 16;
 			files = (
+				0669846D1DF7F8DC0092344A /* fileList.txt in Copy Files */,
 				061A99E11DEECA4D005C727A /* 1.png in Copy Files */,
 				DBA840AA1DEB48A7002CF1CC /* 3.json in Copy Files */,
 				DBA840A41DEAB3CA002CF1CC /* 2.json in Copy Files */,
@@ -37,6 +39,7 @@
 
 /* Begin PBXFileReference section */
 		061A99E01DEECA43005C727A /* 1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 1.png; sourceTree = "<group>"; };
+		0669846C1DF7F8D70092344A /* fileList.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fileList.txt; sourceTree = "<group>"; };
 		06AC15E71DE56F1500421FF8 /* YorkServer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = YorkServer; sourceTree = BUILT_PRODUCTS_DIR; };
 		06AC16301DE5705900421FF8 /* YorkNetwork.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = YorkNetwork.cpp; path = ../../YorkNetWork/YorkNetwork.cpp; sourceTree = "<group>"; };
 		06AC16311DE5705900421FF8 /* YorkNetwork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YorkNetwork.h; path = ../../YorkNetWork/YorkNetwork.h; sourceTree = "<group>"; };
@@ -63,6 +66,7 @@
 		06AC15DE1DE56F1500421FF8 = {
 			isa = PBXGroup;
 			children = (
+				0669846C1DF7F8D70092344A /* fileList.txt */,
 				061A99E01DEECA43005C727A /* 1.png */,
 				DBA840A91DEB48A0002CF1CC /* 3.json */,
 				DBA840A31DEAB3C2002CF1CC /* 2.json */,

@@ -18,28 +18,25 @@ namespace YorkNet {
 	public:
 		YorkSocketClient();
 		virtual ~YorkSocketClient();
-        void connectTo(std::string ip, int port = DEFULT_PORT);
+        virtual void connectTo(std::string ip, int port = DEFULT_PORT);
+        virtual void commandSystem();
+        void disconnect();
         
-        
-        //virtual void didGetMessage(const char *inMessage,const Header &header){};
-        //virtual void didGetFile(const char *inMessage,const Header &header);
-        
-        
+        int         sockID;
+
     private:
         std::string ipAddr;
         int         portNo;
-        int         sockID;
+        bool        finishedFlag = false;
         
         std::thread waitMesThread;
         std::thread cmdSysThread;
         
-        void readFromServer();
-        void commandSystem();
-        
         void writeToServer(std::string message, int64_t tag, int64_t IOB = 1, int64_t TOB =1);
         
-        //void (* didGetFileDelegate)(const char *inMessage,const Header &header);
+        virtual void didGetFile(const Header &header);
         
+        virtual std::string getDirPath(std::string ins);
 	};
 
 } /* namespace York */

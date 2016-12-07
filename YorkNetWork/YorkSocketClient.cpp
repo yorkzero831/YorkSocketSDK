@@ -17,6 +17,7 @@ namespace YorkNet {
 
 	YorkSocketClient::~YorkSocketClient() {
 		// TODO Auto-generated destructor stub
+        disconnect();
 	}
     
     void YorkSocketClient::connectTo(std::string ip, int port)
@@ -27,7 +28,9 @@ namespace YorkNet {
         struct hostent     *server;
         
         char buffer[MAX_BUFFER_SIZE];
+        
         sockID = socket(AF_INET, SOCK_STREAM, 0);
+        
         if(sockID < 0)
         {
             std::cout<< "Error open socket"<< std::endl;
@@ -57,11 +60,13 @@ namespace YorkNet {
         cmdSysThread = std::thread(&YorkNet::YorkSocketClient::commandSystem, this);
         cmdSysThread.detach();
         
-        while (true)
+        while (!finishedFlag)
         {
            std::this_thread::sleep_for(hearBeatC);
         }
         
+        //disconnect();
+        //std::cout<<"END"<<std::endl;
     }
     
     void YorkSocketClient::commandSystem()
@@ -89,6 +94,14 @@ namespace YorkNet {
         }
     }
     
+    void YorkSocketClient::disconnect()
+    {
+        close(sockID);
+        //waitMesThread.~thread();
+        //cmdSysThread.~thread();
+        finishedFlag = true;
+    }
+    
     void YorkSocketClient::writeToServer(std::string message, int64_t tag, int64_t IOB, int64_t TOB)
     {
         char *sentChar = createBuffer(message);
@@ -100,157 +113,25 @@ namespace YorkNet {
         }
     }
     
-    void YorkSocketClient::readFromServer()
+    void YorkSocketClient::didGetFile(const YorkNet::YorkNetwork::Header &header)
     {
-        std::vector<RecivedData>fileContextList = std::vector<RecivedData>();
-        std::string thisFileName          = "";
-        FileTypes   thisFileType          = FileTypes::NONE;
-        while (1)
-        {
-            std::this_thread::sleep_for(hearBeatC);
-            
-            bool isChecked_header                       = false;
-            bool fileDataBegin                          = false;
-            
-            Header thisHeader;
-            
-            
-            size_t buf_Pointer                          = 0;
-            size_t buf_Context_Pointer                  = 0;
-            char headerBuff[HEADER_LENGTH]              = { 0 };
-            char *contextBuff                           = nullptr;
-            
-            if(!isChecked_header)
-            {
-                while (buf_Pointer < HEADER_LENGTH)
-                {
-                    //std::this_thread::sleep_for(hearBeatC);
-                    fcntl(sockID, F_SETFL,  O_NONBLOCK);
-                    if (read(sockID, &headerBuff[buf_Pointer], 1) <= 0)
-                    {
-                        if (errno == EWOULDBLOCK){ break; }
-                        else
-                        {
-                            std::cout<< "No message comes from server"<<std::endl;
-                            close(sockID);
-                            exit(12);
-                        }
-                    }
-                    if (buf_Pointer == HEADER_LENGTH-1)
-                    {
-                        //std::cout <<  " Received:" << headerBuff << std::endl;
-                        
-                        memcpy(&thisHeader, headerBuff, HEADER_LENGTH);
-                        if(thisHeader.tag!=0 && thisHeader.begin==10001)
-                        {
-                            if(thisHeader.totalBlock < thisHeader.indexOfBlock){ break; }
-                            
-                            isChecked_header = true;
-                            contextBuff = new char[thisHeader.length];
-                            
-                            if(thisHeader.fileName != "" && !fileDataBegin )
-                            {
-                                fileDataBegin = true;
-                                thisFileName = thisHeader.fileName;
-                                thisFileType = thisHeader.fileType;
-                            }
-                        }
-                        break;
-                    }
-                    
-                    buf_Pointer++;
-                }
-            }
-            if(isChecked_header)
-            {
-                fcntl(sockID, F_SETFL,  O_NONBLOCK);
-                if (read(sockID, &contextBuff[buf_Context_Pointer], thisHeader.length) <= 0)
-                {
-                    if (errno == EWOULDBLOCK)
-                    {
-                        std::cout<< "None Data found";
-                        break;
-                    }
-                    else
-                    {
-                        std::cout<< "Error on read data";
-                        break;
-                    }
-                }
-                //std::cout <<  " Received:" << contextBuff << std::endl;
-                
-                ////call
-                if(!fileDataBegin) didGetMessage(contextBuff);
-                ////
-                
-                if(fileDataBegin && thisFileName == thisHeader.fileName && thisFileType == thisHeader.fileType)
-                {
-                    
-                    fileContextList.push_back(RecivedData(thisHeader,contextBuff));
-                    
-                    if(thisHeader.indexOfBlock == thisHeader.totalBlock)
-                    {
-                        int64_t blockCount = thisHeader.totalBlock;
-                        int64_t thisfileLength;
-                        if(blockCount > 2)
-                        {
-                            thisfileLength = FILE_BUFFER_SIZE * ( blockCount -1 );
-                            thisfileLength += fileContextList.at(blockCount-1).header.length;
-                        }
-                        else
-                        {
-                            thisfileLength = thisHeader.length;
-                        }
-                        char* fileDataTotal = new char[thisfileLength];
-                        //std::string fileDataTotal;
-                        
-                        int64_t filePostionPointer = 0;
-                        LOOP(thisHeader.totalBlock)
-                        {
-                            //Index error
-                            if(fileContextList.at(ii).header.indexOfBlock != (ii +1))
-                            {
-                                std::cout <<  "Recived file index error:" << std::endl;
-                                thisFileName = "";
-                                fileDataBegin = false;
-                                thisFileType = FileTypes::NONE;
-                                fileContextList.clear();
-                                break;
-                            }
-                            
-                            memcpy(fileDataTotal+filePostionPointer, fileContextList.at(ii).data, fileContextList.at(ii).header.length);
-                            filePostionPointer += fileContextList.at(ii).header.length;
-                            
-                            delete[] fileContextList.at(ii).data;
-                            //fileDataTotal += fileContextList.at(ii).data;
-                        }
-                        
-                        ////call
-                        Header outHeader = Header(thisHeader.tag,thisfileLength,1,1,"",thisHeader.fileType);
-                        didGetFile(fileDataTotal, outHeader);
-                        ////
-                        
-                        thisFileName = "";
-                        fileDataBegin = false;
-                        thisFileType = FileTypes::NONE;
-                        fileContextList.clear();
-                    }
-                }
-                else
-                {
-                    thisFileName = "";
-                    fileDataBegin = false;
-                    thisFileType = FileTypes::NONE;
-                    fileContextList.clear();
-                }
-                
-          
-            }
-            
-        }
-        
+        //disconnect();
+        std::cout<<"Got File "<<header.fileName<< getStringByFileType(header.fileType) << std::endl;
     }
     
+    std::string YorkSocketClient::getDirPath(std::string ins)
+    {
+        std::string out;
+        char cwd[1024];
+        if (getcwd(cwd, sizeof(cwd)) != NULL)
+        {
+            out.append(cwd);
+            out += "/file/";
+            out += ins;
+        }
+        return out;
+    }
+
     
 
 } /* namespace York */

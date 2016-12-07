@@ -18,6 +18,8 @@
 
 #define TIMEOUT                 5000
 
+#define hearBeatC               std::chrono::milliseconds(10)
+
 
 
 #define LOOP(n) for(long ii = 0; ii < n; ++ ii)
@@ -69,7 +71,8 @@ namespace YorkNet {
             CHECKER_TYPE,
             MESSAGES_TYPE,
             FILE_TYPE,
-            FILE_CONFORMER
+            FILE_CONFORMER,
+            COMMAND_TYPE
         };
         
         enum FileTypes
@@ -79,6 +82,11 @@ namespace YorkNet {
             JPG,
             PNG,
             TXT
+        };
+        
+        enum CommandTypes
+        {
+            ///
         };
         
         enum FileState
@@ -190,6 +198,11 @@ namespace YorkNet {
             }
         };
         
+        struct YorkCommand
+        {
+            
+        };
+        
         struct SentingFile
         {
             int64_t begin;
@@ -235,11 +248,31 @@ namespace YorkNet {
             }
         };
         
+        struct FileListOne
+        {
+            std::string name;
+            FileTypes   type;
+            int         version;
+            
+            FileListOne()
+            {
+                name    = "";
+                type    = FileTypes::NONE;
+                version = -1;
+            }
+            FileListOne(std::string n, FileTypes t, int v)
+            {
+                name    = n;
+                type    = t;
+                version = v;
+            }
+        };
+        
 		void ShowErrorMessage(ErrorMessage message);
         
         char endOfStream    = '\0';
         
-        const std::chrono::milliseconds hearBeatC = std::chrono::milliseconds(10);
+        //const std::chrono::milliseconds hearBeatC = std::chrono::milliseconds(10);
         
         //Ceate Buffer For FileType
         char* createBuffer( char *preBuffer, int64_t tag, int64_t numOfBlock = 1,  int64_t indexOfBlock = 1, std::string fileName = "",  FileTypes fileType = FileTypes::NONE, int64_t fileLength = -1);
@@ -263,25 +296,36 @@ namespace YorkNet {
         
         virtual int readFileConformer(const int &socketID);
         
-        virtual void didGetFile(const char *inMessage,const Header &header);
+        virtual void didGetFileData(const char *inMessage,const Header &header);
+        
+        virtual void didGetFile(const Header &header);
         
         virtual void didGetMessage(const char *inMessage){std::cout<< inMessage <<std::endl;};
         
         void getError(size_t error);
         
+        std::string getStringByFileType(FileTypes ins);
+        
+        virtual std::string getDirPath(std::string ins);
+        
+        virtual void getFileListFormFile();
+        
+        virtual void getFileListFromData(const char* ins);
+        
+        virtual void savaFileList(){};
+        
+        virtual void compareFilelist(std::map<std::string, FileListOne> recivedFilelist);
+        
     private:
         
         int64_t _fileID = 0;
         
-        std::map<std::string, SentingFile> _sentingFiles = std::map<std::string, SentingFile>();
-        std::map<std::string, SentingFile> _recivingFiles = std::map<std::string, SentingFile>();
+        std::map<std::string, SentingFile> _sentingFiles    = std::map<std::string, SentingFile>();
+        std::map<std::string, SentingFile> _recivingFiles   = std::map<std::string, SentingFile>();
         
-        std::string getDirPath(std::string ins);
+        std::map<std::string, FileListOne> _fileList        = std::map<std::string, FileListOne>();
         
         FileTypes getFileType(std::string ins);
-        
-        std::string getStringByFileType(FileTypes ins);
-        
         
         
 	};
