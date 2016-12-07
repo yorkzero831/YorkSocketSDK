@@ -66,13 +66,21 @@ namespace YorkNet {
 			CANNOTACCETTCLIENT
 		};
         
+        enum HostType
+        {
+            NOTYPE,
+            SERVER,
+            CLIENT
+        };
+        
         enum HeaderType
         {
             CHECKER_TYPE,
             MESSAGES_TYPE,
             FILE_TYPE,
             FILE_CONFORMER,
-            COMMAND_TYPE
+            //COMMAND_TYPE,
+            FILE_LIST
         };
         
         enum FileTypes
@@ -268,6 +276,11 @@ namespace YorkNet {
             }
         };
         
+        HostType hostType = HostType::NOTYPE;
+        
+        std::map<std::string, FileListOne> _fileList        = std::map<std::string, FileListOne>();
+        
+        
 		void ShowErrorMessage(ErrorMessage message);
         
         char endOfStream    = '\0';
@@ -286,7 +299,7 @@ namespace YorkNet {
         
         size_t getFileSize(const std::string& fileName);
         
-        void sentFileToSocket(int socketID, std::string fileName, std::string fileType);
+        int sentFileToSocket(int socketID, std::string fileName, std::string fileType);
         
         virtual void readFromSocket(const int &socketID);
         
@@ -310,11 +323,13 @@ namespace YorkNet {
         
         virtual void getFileListFormFile();
         
-        virtual void getFileListFromData(const char* ins);
+        virtual std::map<std::string, FileListOne> getFileListFromData(const char* ins);
         
-        virtual void savaFileList(){};
+        virtual void savaFileList(const char *inMessage);
         
-        virtual void compareFilelist(std::map<std::string, FileListOne> recivedFilelist);
+        virtual void getDataFromFileList(std::map<std::string, FileListOne> ins);
+        
+        
         
     private:
         
@@ -322,8 +337,7 @@ namespace YorkNet {
         
         std::map<std::string, SentingFile> _sentingFiles    = std::map<std::string, SentingFile>();
         std::map<std::string, SentingFile> _recivingFiles   = std::map<std::string, SentingFile>();
-        
-        std::map<std::string, FileListOne> _fileList        = std::map<std::string, FileListOne>();
+  
         
         FileTypes getFileType(std::string ins);
         

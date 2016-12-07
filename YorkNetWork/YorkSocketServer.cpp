@@ -21,6 +21,8 @@ namespace YorkNet {
 
 	void YorkSocketServer::StartServer(int portNum )
 	{
+        hostType = HostType::SERVER;
+        
 		//clients = std::map<std::string, int>();
 		if ((listenSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
 		{
@@ -178,6 +180,7 @@ namespace YorkNet {
 				std::cout << "received a connection from " << ctrr << std::endl;
                 //clients.insert(std::pair<std::string, int>(ctrr, clientSocket));
                 clientSockets.insert(std::pair<int, std::string>(clientSocket, ctrr));
+                fileNeedToDoList.insert(std::pair<int, FileNeedToDo>(clientSocket,FileNeedToDo()));
 				//if (!fork())
 				{
 					SentMessageTo(clientSocket, "You are In!!",1);
@@ -216,6 +219,7 @@ namespace YorkNet {
                         clientSockets.erase(socketID);
                         close(clientSocket);
                         waitingMessageThreads.erase(socketID);
+                        fileNeedToDoList.erase(socketID);
                         return;
                     }
                 }
@@ -263,10 +267,10 @@ namespace YorkNet {
         waitMesThread.~thread();
         connectThread.~thread();
         cmdSysThread.~thread();
-        std::map<std::string, int>::iterator itor;
-        for (itor = clients.begin(); itor != clients.end(); itor++)
+        std::map<int, std::string>::iterator itor;
+        for (itor = clientSockets.begin(); itor != clientSockets.end(); itor++)
         {
-            int thisSocketID = itor->second;
+            int thisSocketID = itor->first;
             close(thisSocketID);
             waitingMessageThreads[thisSocketID]->~thread();
             delete waitingMessageThreads[thisSocketID];
@@ -307,21 +311,6 @@ namespace YorkNet {
         char *sentChar = createBuffer(words);
         int64_t size = words.length();
 
-//        std::map<std::string, int>::iterator it;
-//		for (it = clients.begin(); it != clients.end(); it++)
-//		{
-//			fcntl(it->second, F_SETFL, O_NONBLOCK);
-//			if (send(it->second, sentChar, size + HEADER_LENGTH, 0) == -1)
-//			{
-//				if (errno == EWOULDBLOCK)
-//				{
-//					//std::cout << "nothing" << std::endl;
-//					continue;
-//				}
-//				perror("Send error！");
-//                needToDelete.push_back(it->first);
-//			}
-//		}
         std::map<int, std::string>::iterator it;
         for (it = clientSockets.begin(); it != clientSockets.end(); it++)
         {
@@ -342,6 +331,34 @@ namespace YorkNet {
             clientSockets.erase(needToDelete.at(i));
         }
 	}
+    
+    void YorkSocketServer::compareFilelist(std::map<std::string, FileListOne> recivedFilelist, int socketID)
+    {
+        FileNeedToDo thisSocketNeedToDo =  fileNeedToDoList[socketID];
+        std::map<std::string, FileListOne>::iterator itor;
+        for (itor = _fileList.begin(); itor != _fileList.end(); itor++)
+        {
+            int inVersion = recivedFilelist[itor->first].version;
+            int version   = itor->second.version;
+            if(!inVersion)
+            {
+                //
+                if(inVersion < version)
+                {
+                    thisSocketNeedToDo.needToSend.push_back(itor->first);
+                }
+                else if(inVersion > version)
+                {
+                    thisSocketNeedToDo.needToRecived.push_back(itor->first);
+                }
+            }
+        }
+        
+        if(thisSocketNeedToDo.needToRecived.size() != 0 || thisSocketNeedToDo.needToSend.size() != 0)
+        {
+            //add pieceinfo
+        }
+    }
     
     
     

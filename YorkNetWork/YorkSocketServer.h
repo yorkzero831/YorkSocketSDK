@@ -20,7 +20,21 @@ namespace YorkNet {
 
 	class YorkSocketServer :public YorkNetwork
 	{
-	public:
+    public:
+        
+        struct FileNeedToDo
+        {
+            std::vector<std::string> needToSend;
+            std::vector<std::string> needToRecived;
+            
+            FileNeedToDo()
+            {
+                needToSend    = std::vector<std::string>();
+                needToRecived = std::vector<std::string>();
+            }
+        };
+        
+        
 		YorkSocketServer();
 		~YorkSocketServer();
 
@@ -28,6 +42,8 @@ namespace YorkNet {
 		void StopServer();
 		void SentMessageTo(int socketID, std::string words, int64_t tag, int64_t IOB = 1, int64_t TOB =1);
 		void SentMessageToALL(std::string words, int64_t tag, int64_t IOB = 1, int64_t TOB =1);
+        
+        virtual void compareFilelist(std::map<std::string, FileListOne> recivedFilelist, int socketID);
         
 		
 	private:
@@ -46,8 +62,10 @@ namespace YorkNet {
 		char buf[MAX_BUFFER_SIZE];
         
         std::map<int, std::thread*> waitingMessageThreads;
-        std::map<std::string, int> clients = std::map<std::string, int>();
-        std::map<int, std::string> clientSockets = std::map<int, std::string>();
+        
+        //std::map<std::string, int> clients              = std::map<std::string, int>();
+        std::map<int, FileNeedToDo> fileNeedToDoList    = std::map<int, FileNeedToDo>();
+        std::map<int, std::string> clientSockets        = std::map<int, std::string>();
 
 		void bindServer();
 		void runServer();

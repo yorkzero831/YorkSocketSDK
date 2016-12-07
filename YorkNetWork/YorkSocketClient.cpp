@@ -22,6 +22,8 @@ namespace YorkNet {
     
     void YorkSocketClient::connectTo(std::string ip, int port)
     {
+        hostType = HostType::CLIENT;
+        
         ipAddr = ip;
         portNo = port;
         struct sockaddr_in server_addr;

@@ -79,7 +79,7 @@ namespace YorkNet {
     }
     
     //Function called when sent file to socket
-    void YorkNetwork::sentFileToSocket(int socketID, std::string fileName, std::string fileType)
+    int YorkNetwork::sentFileToSocket(int socketID, std::string fileName, std::string fileType)
     {
         bool isFirstTime =true;
         
@@ -113,7 +113,7 @@ namespace YorkNet {
         {
             fclose(fileR);
             std::cout << "Can not OpenFile "<< filePath << std::endl;
-            return;
+            return -1001;
         }
         
         
@@ -184,6 +184,8 @@ namespace YorkNet {
         
         fclose(fileR);
         std::cout << "File: "<< filePath<<" Transfer finished"  << std::endl;
+        
+        return 0;
     }
     
     void YorkNetwork::readFromSocket(const int &socketID)
@@ -695,8 +697,9 @@ namespace YorkNet {
         return out;
     }
     
-    void YorkNetwork::getFileListFromData(const char *ins)
+    std::map<std::string, YorkNetwork::FileListOne> YorkNetwork::getFileListFromData(const char *ins)
     {
+        std::map<std::string, FileListOne> out = std::map<std::string, FileListOne>();
         size_t size = strlen(ins);
         std::string name = "";
         std::string type = "";
@@ -748,7 +751,7 @@ namespace YorkNet {
                     version = atoi(tempContainer);
                     pointer = 0;
                     FileListOne oo = FileListOne(name,getFileType(type),version);
-                    _fileList.insert(std::pair<std::string, FileListOne>(name, oo));
+                    out.insert(std::pair<std::string, FileListOne>(name, oo));
                     caseFlag = 0;
                     bzero(tempContainer, 20);
                     continue;
@@ -763,6 +766,7 @@ namespace YorkNet {
             
         }
         
+        return out;
     }
     
     void YorkNetwork::getFileListFormFile()
@@ -789,14 +793,21 @@ namespace YorkNet {
             std::cout << "Can not Read File "<< fileAbslutPath << std::endl;
         }
         
-        getFileListFromData(fileListData);
+        _fileList = getFileListFromData(fileListData);
         
     }
     
-    void YorkNetwork::compareFilelist(std::map<std::string, FileListOne> recivedFilelist)
+    void YorkNetwork::savaFileList(const char *inMessage)
     {
         
     }
+    
+    void YorkNetwork::getDataFromFileList(std::map<std::string, FileListOne> ins)
+    {
+        
+    }
+    
+    
     
 
 } /* namespace York */
