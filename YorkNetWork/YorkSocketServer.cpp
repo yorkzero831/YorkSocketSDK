@@ -350,6 +350,7 @@ namespace YorkNet {
                 else if(inVersion > version)
                 {
                     thisSocketNeedToDo.needToRecived.push_back(itor->first);
+                    itor->second.version = inVersion;
                 }
             }
         }
@@ -357,7 +358,16 @@ namespace YorkNet {
         if(thisSocketNeedToDo.needToRecived.size() != 0 || thisSocketNeedToDo.needToSend.size() != 0)
         {
             //add pieceinfo
+            
+            //
+            
+            const char* saveData = getDataFromFileList(_fileList);
+            int64_t length = strlen(saveData);
+            saveFile(saveData, "fileList", FileTypes::TXT, length);
+            
         }
+        
+        std::cout << "Compare FileList Finished" << std::endl;
     }
     
     

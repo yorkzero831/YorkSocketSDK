@@ -561,21 +561,9 @@ namespace YorkNet {
     //Fuction called when file did all recived
     void YorkNetwork::didGetFileData(const char *inMessage, const YorkNet::YorkNetwork::Header &header)
     {
-        std::string fileName = "temp" + getStringByFileType(header.fileType);
+        saveFile(inMessage, "temp", header.fileType, header.length);
         
-        FILE *fileToWrite;
-        if(header.fileType == FileTypes::TXT || header.fileType == FileTypes::JSON || header.fileType == FileTypes::NONE)
-        {
-            fileToWrite = fopen(getDirPath(fileName).c_str(), "w+");
-        }
-        else
-        {
-            fileToWrite = fopen(getDirPath(fileName).c_str(), "wb");
-        }
-        fwrite(inMessage, sizeof(char), header.length, fileToWrite);
-        fclose(fileToWrite);
         delete []inMessage;
-        std::cout<<"Finsh on save file"<< std::endl;
         getFileListFromData(inMessage);
         didGetFile(header);
         
@@ -647,6 +635,23 @@ namespace YorkNet {
             out += ins;
         }
         return out;
+    }
+    
+    void YorkNetwork::saveFile(const char *inMessage, const std::string &name, const FileTypes &fileType, const int64_t &size)
+    {
+        std::string fileName = name + getStringByFileType(fileType);
+        FILE *fileToWrite;
+        if(fileType == FileTypes::TXT || fileType == FileTypes::JSON || fileType == FileTypes::NONE)
+        {
+            fileToWrite = fopen(getDirPath(fileName).c_str(), "w+");
+        }
+        else
+        {
+            fileToWrite = fopen(getDirPath(fileName).c_str(), "wb");
+        }
+        fwrite(inMessage, sizeof(char), size, fileToWrite);
+        fclose(fileToWrite);
+        std::cout<<"Finsh on save file"<< std::endl;
     }
     
     YorkNetwork::FileTypes YorkNetwork::getFileType(std::string ins)
@@ -797,14 +802,25 @@ namespace YorkNet {
         
     }
     
-    void YorkNetwork::savaFileList(const char *inMessage)
-    {
-        
-    }
     
-    void YorkNetwork::getDataFromFileList(std::map<std::string, FileListOne> ins)
+    const char* YorkNetwork::getDataFromFileList(std::map<std::string, FileListOne> ins)
     {
+        std::string toSave = "";
+        std::map<std::string, YorkNetwork::FileListOne>::iterator itor;
+        for (itor = ins.begin(); itor != ins.end(); itor++)
+        {
+            FileListOne one = itor->second;
+            toSave += one.name;
+            toSave += " ";
+            toSave += one.type;
+            toSave += " ";
+            toSave += std::to_string(one.version);
+            toSave += "\r";
+        }
         
+        const char *out = toSave.c_str();
+        
+        return out;
     }
     
     

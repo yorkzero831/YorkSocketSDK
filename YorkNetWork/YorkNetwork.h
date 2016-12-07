@@ -80,7 +80,8 @@ namespace YorkNet {
             FILE_TYPE,
             FILE_CONFORMER,
             //COMMAND_TYPE,
-            FILE_LIST
+            FILE_LIST,
+            FILL_REQUEST
         };
         
         enum FileTypes
@@ -321,13 +322,15 @@ namespace YorkNet {
         
         virtual std::string getDirPath(std::string ins);
         
+        void saveFile(const char *inMessage, const std::string &name, const FileTypes &fileType, const int64_t &size);
+        
+        
+        
         virtual void getFileListFormFile();
         
         virtual std::map<std::string, FileListOne> getFileListFromData(const char* ins);
         
-        virtual void savaFileList(const char *inMessage);
-        
-        virtual void getDataFromFileList(std::map<std::string, FileListOne> ins);
+        virtual const char* getDataFromFileList(std::map<std::string, FileListOne> ins);
         
         
         
