@@ -24,13 +24,13 @@ namespace YorkNet {
         
         struct FileNeedToDo
         {
-            std::vector<std::string> needToSend;
-            std::vector<std::string> needToRecived;
+            std::vector<FileListOne> needToSend;
+            std::vector<FileListOne> needToRecived;
             
             FileNeedToDo()
             {
-                needToSend    = std::vector<std::string>();
-                needToRecived = std::vector<std::string>();
+                needToSend    = std::vector<FileListOne>();
+                needToRecived = std::vector<FileListOne>();
             }
         };
         
@@ -43,7 +43,9 @@ namespace YorkNet {
 		void SentMessageTo(int socketID, std::string words, int64_t tag, int64_t IOB = 1, int64_t TOB =1);
 		void SentMessageToALL(std::string words, int64_t tag, int64_t IOB = 1, int64_t TOB =1);
         
-        virtual void compareFilelist(std::map<std::string, FileListOne> recivedFilelist, int socketID);
+        virtual void didGetFileList(std::map<std::string, FileListOne> ins, const int &socketID);
+        
+        virtual void didGetFileRequestList(std::map<std::string, FileListOne> ins, const int &socketID);
         
 		
 	private:

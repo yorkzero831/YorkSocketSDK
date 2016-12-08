@@ -67,8 +67,6 @@ namespace YorkNet {
            std::this_thread::sleep_for(hearBeatC);
         }
         
-        //disconnect();
-        //std::cout<<"END"<<std::endl;
     }
     
     void YorkSocketClient::commandSystem()
@@ -106,13 +104,16 @@ namespace YorkNet {
     
     void YorkSocketClient::writeToServer(std::string message, int64_t tag, int64_t IOB, int64_t TOB)
     {
-        char *sentChar = createBuffer(message);
+        char *sentChar = createBufferForMessage(message);
         int64_t size = message.length();
         
         //strcpy(sentChar, words.c_str());
         if (send(sockID, sentChar, size + HEADER_LENGTH, 0) == -1) {
+            delete [] sentChar;
             perror("Send error！");
         }
+        
+        delete [] sentChar;
     }
     
     void YorkSocketClient::didGetFile(const YorkNet::YorkNetwork::Header &header)

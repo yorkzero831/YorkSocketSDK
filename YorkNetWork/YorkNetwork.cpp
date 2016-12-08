@@ -24,7 +24,7 @@ namespace YorkNet {
 		std::cout << message.errorWords << " WITH ERROMESSAGE : " << message.details<<std::endl;
 	}
     
-    char* YorkNetwork::createBuffer( char *preBuffer,  int64_t tag, int64_t numOfBlock,  int64_t indexOfBlock,  std::string fileName,  FileTypes fileType, int64_t fileLength)
+    char* YorkNetwork::createBufferForFile( char *preBuffer,  int64_t tag, int64_t numOfBlock,  int64_t indexOfBlock,  std::string fileName,  FileTypes fileType, int64_t fileLength)
     {
         int64_t bufferLength;
         if(fileLength == -1){ bufferLength = strlen(preBuffer); }
@@ -48,7 +48,7 @@ namespace YorkNet {
         return out;
     }
     
-    char* YorkNetwork::createBuffer(const std::string &message)
+    char* YorkNetwork::createBufferForMessage(const std::string &message)
     {
         int64_t bufferLength    = message.length();
         MessageHeader mHeader   = MessageHeader(bufferLength);
@@ -66,7 +66,7 @@ namespace YorkNet {
         return out;
     }
     
-    char* YorkNetwork::createBuffer(const SentingFile &thisSentingFile)
+    char* YorkNetwork::createBufferForConformer(const SentingFile &thisSentingFile)
     {
         char *out = new char[CHECKER_HEADER_LENGTH + SENTING_FILE_H_LENGTH];
         CheckerHeader cekHeader = CheckerHeader(HeaderType::FILE_CONFORMER);
@@ -78,8 +78,33 @@ namespace YorkNet {
         return out;
     }
     
+    char* YorkNetwork::createBufferForFileList(const YorkNet::YorkNetwork::FileListHeader &thisFRHeader, const char* fileRequestListData, bool const &isRequest)
+    {
+        int64_t dataSize = strlen(fileRequestListData);
+        
+        char *out = new char[CHECKER_HEADER_LENGTH + FILES_LIST_LENGTH + dataSize];
+        CheckerHeader cekHeader;
+        if (isRequest)
+        {
+           cekHeader = CheckerHeader(HeaderType::FILE_REQUEST);
+        }
+        else
+        {
+            cekHeader = CheckerHeader(HeaderType::FILE_LIST);
+        }
+        
+        
+        memcpy(out, &cekHeader , CHECKER_HEADER_LENGTH);
+        
+        memcpy(out + CHECKER_HEADER_LENGTH, &thisFRHeader, FILES_LIST_LENGTH);
+        
+        strcpy(out + CHECKER_HEADER_LENGTH + FILES_LIST_LENGTH, fileRequestListData);
+        
+        return out;
+    }
+    
     //Function called when sent file to socket
-    int YorkNetwork::sentFileToSocket(int socketID, std::string fileName, std::string fileType)
+    int YorkNetwork::sentFileToSocket(const int &socketID, std::string fileName, std::string fileType)
     {
         bool isFirstTime =true;
         
@@ -157,7 +182,7 @@ namespace YorkNet {
             if(thisBlockNum < fileBlockTotal){ blockLenth = FILE_BUFFER_SIZE;}
             else if (thisBlockNum == fileBlockTotal) { blockLenth = fileSize%FILE_BUFFER_SIZE ;}
             
-            char *sentChar = createBuffer(buffer, _fileID, fileBlockTotal, thisBlockNum, fileName, fileTypeT, blockLenth);
+            char *sentChar = createBufferForFile(buffer, _fileID, fileBlockTotal, thisBlockNum, fileName, fileTypeT, blockLenth);
             int64_t sentLenth = strlen(buffer);
             
             fcntl(socketID, F_SETFL,  O_NONBLOCK);
@@ -184,6 +209,46 @@ namespace YorkNet {
         
         fclose(fileR);
         std::cout << "File: "<< filePath<<" Transfer finished"  << std::endl;
+        
+        return 0;
+    }
+    
+    int YorkNetwork::sentFileListToSocket(const int &socketID, const char *fileRequestData, const int64_t &fileCount)
+    {
+        FileListHeader thisFRHeader = FileListHeader(strlen(fileRequestData), fileCount);
+        
+        char *sentBuff = createBufferForFileList(thisFRHeader, fileRequestData, false);
+        
+        int64_t dataSize = strlen(fileRequestData);
+        
+        if(send(socketID, sentBuff, dataSize + FILES_LIST_LENGTH + CHECKER_HEADER_LENGTH, 0) < 0)
+        {
+            getError(errno);
+            
+            delete[] sentBuff;
+            std::cout << "Error on sending file"  << std::endl;
+            return -1001;
+        }
+        
+        return 0;
+    }
+    
+    int YorkNetwork::sentFileRequestToSocket(const int &socketID, const char *fileRequestData, const int64_t &fileCount)
+    {
+        FileListHeader thisFRHeader = FileListHeader(strlen(fileRequestData), fileCount);
+        
+        char *sentBuff = createBufferForFileList(thisFRHeader, fileRequestData, true);
+        
+        int64_t dataSize = strlen(fileRequestData);
+        
+        if(send(socketID, sentBuff, dataSize + FILES_LIST_LENGTH + CHECKER_HEADER_LENGTH, 0) < 0)
+        {
+            getError(errno);
+            
+            delete[] sentBuff;
+            std::cout << "Error on sending file"  << std::endl;
+            return -1001;
+        }
         
         return 0;
     }
@@ -226,22 +291,35 @@ namespace YorkNet {
                     switch (checkHeader.headerType) {
                         case HeaderType::MESSAGES_TYPE :
                         {
-                            error = readMessage(socketID);
+                            error = readMessageFromSocket(socketID);
                             getError(error);
                             break;
                         }
                         case HeaderType::FILE_TYPE :
                         {
-                            error = readFile(socketID, checkedFileConformer);
+                            error = readFileFromSocket(socketID, checkedFileConformer);
                             getError(error);
                             break;
                         }
                         case HeaderType::FILE_CONFORMER :
                         {
-                            error = readFileConformer(socketID);
+                            error = readFileConformerFromSocket(socketID);
                             getError(error);
                             break;
                         }
+                        case HeaderType::FILE_LIST :
+                        {
+                            error = readFileListFromSocket(socketID);
+                            getError(error);
+                            break;
+                        }
+                        case HeaderType::FILE_REQUEST :
+                        {
+                            error = readFileRequestFromSocket(socketID);
+                            getError(error);
+                            break;
+                        }
+                        
    
                         default:
                             break;
@@ -252,7 +330,7 @@ namespace YorkNet {
         }
     }
     
-    int YorkNetwork::readMessage(const int &socketID)
+    int YorkNetwork::readMessageFromSocket(const int &socketID)
     {
         char MessageHeaderBuff[MESSAGE_HEADER_LENGTH]   = { 0 };
         int64_t buf_Context_Pointer                     = 0;
@@ -306,7 +384,7 @@ namespace YorkNet {
         return 0;
     }
     
-    int YorkNetwork::readFile(const int &socketID, int *indexOfCheckedBlock)
+    int YorkNetwork::readFileFromSocket(const int &socketID, int *indexOfCheckedBlock)
     {
         std::vector<RecivedData>fileContextList     = std::vector<RecivedData>();
         char headerBuff[HEADER_LENGTH]              = { 0 };
@@ -436,7 +514,7 @@ namespace YorkNet {
                 //std::cout << "content : "<< contextBuff<<std::endl;
                 
                 SentingFile thisRecivedOne = SentingFile(thisHeader.tag,thisHeader.indexOfBlock);
-                char* fileConformer = createBuffer(thisRecivedOne);
+                char* fileConformer = createBufferForConformer(thisRecivedOne);
                 
                 //std::this_thread::sleep_for(hearBeatC);
                 fcntl(socketID, F_SETFL,  O_NONBLOCK);
@@ -445,16 +523,20 @@ namespace YorkNet {
                     if (errno == EWOULDBLOCK)
                     {
                         std::cout<< "File Conformer Error1"<<std::endl;
+                        delete[] fileConformer;
                         delete[] contextBuff;
                         return errno;
                     }
                     else
                     {
                         std::cout<< "File Conformer Error2"<<std::endl;
+                        delete[] fileConformer;
                         delete[] contextBuff;
                         return errno;;
                     }
                 }
+                //delete header buff pointer
+                delete[] fileConformer;
                 //std::cout <<  "===========Will Receive "<< thisHeader.indexOfBlock<<":"<<thisHeader.totalBlock<< std::endl;
                 
                 if(thisHeader.indexOfBlock == thisHeader.totalBlock)
@@ -493,6 +575,7 @@ namespace YorkNet {
                         //fileContextList.clear();
                     }
                     Header outHeader = Header(thisHeader.tag,thisfileLength,1,1,thisFileName,thisHeader.fileType);
+                    std::cout <<  "Recived file data "<<thisHeader.fileName << std::endl;
                     didGetFileData(fileDataTotal, outHeader);
                     
                     _recivingFiles.erase(fileUniName);
@@ -504,18 +587,12 @@ namespace YorkNet {
                 }
             }
 
-            
-            
         }
-        
-        
-        
-        
         
         return 0;
     }
     
-    int YorkNetwork::readFileConformer(const int &socketID)
+    int YorkNetwork::readFileConformerFromSocket(const int &socketID)
     {
         char fileConfomerBuff[SENTING_FILE_H_LENGTH];
         SentingFile thisSentingFile;
@@ -558,9 +635,120 @@ namespace YorkNet {
         return 0;
     }
     
+    int YorkNetwork::readFileListFromSocket(const int &socketID)
+    {
+        char fileListHeaderBuff[FILES_LIST_LENGTH];
+        
+        
+        if (read(socketID, fileListHeaderBuff, FILES_LIST_LENGTH) <= 0)
+        {
+            if (errno == EWOULDBLOCK)
+            {
+                std::cout<< "None FileListHeader Data Found"<<std::endl;
+                return errno;
+                //break;
+            }
+            else
+            {
+                std::cout<< "Error On Read FileListHeader Data"<<std::endl;
+                return errno;
+            }
+        }
+        
+        FileListHeader thisRequest;
+        memcpy(&thisRequest, fileListHeaderBuff, FILES_LIST_LENGTH);
+        
+        if(thisRequest.begin != 10001)
+        {
+            return -1001;
+        }
+        
+        
+        char *requestData = new char[thisRequest.length];
+        
+        if (read(socketID, requestData, thisRequest.length) <= 0)
+        {
+            delete[] requestData;
+            
+            if (errno == EWOULDBLOCK)
+            {
+                std::cout<< "None FileList Data Found"<<std::endl;
+                return errno;
+                //break;
+            }
+            else
+            {
+                std::cout<< "Error On Read FileList Data"<<std::endl;
+                return errno;
+            }
+        }
+        
+        didGetFileList(getFileListFromData(requestData),socketID);
+        
+        delete[] requestData;
+        return 0;
+    }
+    
+    int YorkNetwork::readFileRequestFromSocket(const int &socketID)
+    {
+        char fileRequestHeaderBuff[FILES_LIST_LENGTH];
+        
+        
+        if (read(socketID, fileRequestHeaderBuff, FILES_LIST_LENGTH) <= 0)
+        {
+            if (errno == EWOULDBLOCK)
+            {
+                std::cout<< "None FileListHeader Data Found"<<std::endl;
+                return errno;
+                //break;
+            }
+            else
+            {
+                std::cout<< "Error On Read FileListHeader Data"<<std::endl;
+                return errno;
+            }
+        }
+        
+        FileListHeader thisRequest;
+        memcpy(&thisRequest, fileRequestHeaderBuff, FILES_LIST_LENGTH);
+        
+        if(thisRequest.begin != 10001)
+        {
+            return -1001;
+        }
+        
+        
+        char requestData[thisRequest.length];
+        
+        if (read(socketID, requestData, thisRequest.length) <= 0)
+        {
+            if (errno == EWOULDBLOCK)
+            {
+                std::cout<< "None FileList Data Found"<<std::endl;
+                return errno;
+                //break;
+            }
+            else
+            {
+                std::cout<< "Error On Read FileList Data"<<std::endl;
+                return errno;
+            }
+        }
+        
+        std::map<std::string, FileListOne> getFileList = getFileListFromData(requestData);
+        if (getFileList.size() != thisRequest.count)
+        {
+            return -1001;
+        }
+        
+        didGetFileRequestList(getFileList, socketID);
+        return 0;
+    }
+    
     //Fuction called when file did all recived
     void YorkNetwork::didGetFileData(const char *inMessage, const YorkNet::YorkNetwork::Header &header)
     {
+        std::cout<< "Success Saved"<< header.fileName << "."<< getStringByFileType(header.fileType) <<std::endl;
         saveFile(inMessage, "temp", header.fileType, header.length);
         
         delete []inMessage;
@@ -613,7 +801,6 @@ namespace YorkNet {
         }
 
     }
-
     
     size_t YorkNetwork::getFileSize(const std::string& fileName)
     {
@@ -684,16 +871,16 @@ namespace YorkNet {
         switch (ins)
         {
             case FileTypes::PNG :
-                out = ".png";
+                out = "png";
                 break;
             case FileTypes::JSON :
-                out = ".json";
+                out = "json";
                 break;
             case FileTypes::JPG :
-                out = ".jpg";
+                out = "jpg";
                 break;
             case FileTypes::TXT :
-                out = ".txt";
+                out = "txt";
                 break;
             case FileTypes::NONE :
                 out = "";
@@ -705,6 +892,8 @@ namespace YorkNet {
     std::map<std::string, YorkNetwork::FileListOne> YorkNetwork::getFileListFromData(const char *ins)
     {
         std::map<std::string, FileListOne> out = std::map<std::string, FileListOne>();
+        out.clear();
+        
         size_t size = strlen(ins);
         std::string name = "";
         std::string type = "";
@@ -713,7 +902,7 @@ namespace YorkNet {
         char tempContainer[20];
         int pointer = 0;
         bzero(tempContainer, 20);
-        LOOP(size)
+        LOOP(size+1)
         {
             //tempContainer[pointer] = ins[ii];
             //name
@@ -725,6 +914,10 @@ namespace YorkNet {
                     pointer = 0;
                     caseFlag ++;
                     bzero(tempContainer, 20);
+                    if(name == "210")
+                    {
+                        int o = 10;
+                    }
                     continue;
                 }
                 else
@@ -751,7 +944,7 @@ namespace YorkNet {
             //version
             else if (caseFlag == 2)
             {
-                if(ins[ii] == '\n' || ii == size-1)
+                if(ins[ii] == '\r' || ii == size || ins[ii] == '\n')
                 {
                     version = atoi(tempContainer);
                     pointer = 0;
@@ -774,7 +967,7 @@ namespace YorkNet {
         return out;
     }
     
-    void YorkNetwork::getFileListFormFile()
+    const char* YorkNetwork::getFileListDataFormFile()
     {
         std::string fileAbslutPath = getDirPath("fileList.txt");
         // count fileBlock sent
@@ -788,20 +981,20 @@ namespace YorkNet {
         {
             fclose(fileR);
             std::cout << "Can not Open File "<< fileAbslutPath << std::endl;
-            return;
+            return nullptr;
         }
         int64_t file_block_length = fread(fileListData, sizeof(char), FILE_BUFFER_SIZE, fileR);
-        
+        fclose(fileR);
         if(file_block_length != fileSize)
         {
-            fclose(fileR);
+            //fclose(fileR);
             std::cout << "Can not Read File "<< fileAbslutPath << std::endl;
         }
         
-        _fileList = getFileListFromData(fileListData);
+        return fileListData;
+        //_fileList = getFileListFromData(fileListData);
         
     }
-    
     
     const char* YorkNetwork::getDataFromFileList(std::map<std::string, FileListOne> ins)
     {
@@ -810,14 +1003,31 @@ namespace YorkNet {
         for (itor = ins.begin(); itor != ins.end(); itor++)
         {
             FileListOne one = itor->second;
-            toSave += one.name;
-            toSave += " ";
-            toSave += one.type;
-            toSave += " ";
-            toSave += std::to_string(one.version);
-            toSave += "\r";
+            toSave.append(one.name);
+            toSave.append(" ");
+            toSave.append(getStringByFileType(one.type));
+            toSave.append(" ");
+            toSave.append(std::to_string(one.version));
+            toSave.append("\r");
         }
+        const char *out = toSave.c_str();
         
+        return out;
+    }
+    
+    const char* YorkNetwork::getDataFromFileList(std::vector<FileListOne> ins)
+    {
+        std::string toSave = "";
+        LOOP(ins.size())
+        {
+            FileListOne one = ins.at(ii);
+            toSave.append(one.name);
+            toSave.append(" ");
+            toSave.append(getStringByFileType(one.type));
+            toSave.append(" ");
+            toSave.append(std::to_string(one.version));
+            toSave.append("\r");
+        }
         const char *out = toSave.c_str();
         
         return out;
