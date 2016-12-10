@@ -37,6 +37,8 @@ namespace YorkNet {
         virtual void didGetFile(const Header &header);
         
         virtual std::string getDirPath(std::string ins);
+        
+        virtual void didGetCommand(const CommandHeader &inCmd, const int &socketID){};
 	};
 
 } /* namespace York */

@@ -8,7 +8,7 @@
 #ifndef YORKNETWORK_H_
 #define YORKNETWORK_H_
 
-#define DEFULT_PORT             10833
+#define DEFULT_PORT             10832
 #define  MAX_BUFFER_SIZE        2120
 #define HEADER_LENGTH           72
 #define FILE_BUFFER_SIZE        100000
@@ -16,6 +16,7 @@
 #define MESSAGE_HEADER_LENGTH   16
 #define SENTING_FILE_H_LENGTH   24
 #define FILES_LIST_LENGTH       24
+#define COMMAND_HEADER_LENGTH   16
 
 #define TIMEOUT                 5000
 
@@ -80,9 +81,10 @@ namespace YorkNet {
             MESSAGES_TYPE,
             FILE_TYPE,
             FILE_CONFORMER,
-            //COMMAND_TYPE,
+            COMMAND_TYPE,
             FILE_LIST,
-            FILE_REQUEST
+            FILE_REQUEST_NEED_TO_SEND,
+            FILE_REQUEST_NEED_TO_RECIEVE
         };
         
         enum FileTypes
@@ -96,7 +98,8 @@ namespace YorkNet {
         
         enum CommandTypes
         {
-            ///
+            NONE_COMMAND,
+            FILE_NO_NEED_CHANGE,
         };
         
         enum FileState
@@ -115,6 +118,23 @@ namespace YorkNet {
 			}
 		};
         
+        struct CommandHeader
+        {
+            int64_t      begin;
+            CommandTypes cmd;
+            CommandHeader()
+            {
+                begin = -1;
+                cmd   = CommandTypes::NONE_COMMAND;
+            }
+            CommandHeader(const CommandTypes &inCmd)
+            {
+                begin = 10001;
+                cmd   = inCmd;
+            }
+            
+        };
+        
         struct CheckerHeader
         {
             int64_t begin;
@@ -126,7 +146,7 @@ namespace YorkNet {
             }
             CheckerHeader()
             {
-                begin = 10001;
+                begin = -1;
                 headerType = HeaderType::CHECKER_TYPE;
             }
         };
@@ -166,19 +186,19 @@ namespace YorkNet {
         struct FileListHeader
         {
             int64_t begin;
-            int64_t length;
+            int64_t dataLength;
             int64_t count;
             FileListHeader()
             {
-                begin   = -1;
-                length  = -1;
-                count   = -1;
+                begin       = -1;
+                dataLength  = -1;
+                count       = -1;
             }
             FileListHeader(const int64_t &l, const int64_t &c)
             {
-                begin   = 10001;
-                length  = l;
-                count   = c;
+                begin       = 10001;
+                dataLength  = l;
+                count       = c;
             }
         };
         
@@ -272,8 +292,8 @@ namespace YorkNet {
             
             ~RecivedData()
             {
-                data = new char[0];
-                delete[] data;
+                //data = new char[0];
+                //delete[] data;
             }
         };
         
@@ -315,7 +335,9 @@ namespace YorkNet {
         //Ceate Buffer For sentingFile
         char* createBufferForConformer(const SentingFile &thisSentingFile);
         
-        char* createBufferForFileList(const FileListHeader &thisFRHeader, const char* fileRequestListData, bool const &isRequest);
+        char* createBufferForFileList(const FileListHeader &thisFRHeader, const char* fileRequestListData, const HeaderType &type);
+        
+        char* createBufferForCommand(const CommandTypes &cmd);
         
         size_t getFileSize(const std::string& fileName);
         
@@ -323,7 +345,9 @@ namespace YorkNet {
         
         int sentFileListToSocket(const int &socketID, const char* fileRequestData, const int64_t &fileCount);
         
-        int sentFileRequestToSocket(const int &socketID, const char* fileRequestData, const int64_t &fileCount);
+        int sentFileRequestToSocket(const int &socketID, const char* fileRequestData, const int64_t &fileCount, const HeaderType &type);
+        
+        int sentCommandToSocket(const int &socketID, const CommandTypes &cmd);
         
         virtual void readFromSocket(const int &socketID);
         
@@ -335,7 +359,9 @@ namespace YorkNet {
         
         virtual int readFileListFromSocket(const int &socketID);
         
-        virtual int readFileRequestFromSocket(const int &socketID);
+        virtual int readFileRequestFromSocket(const int &socketID, const HeaderType &type);
+        
+        virtual int readCommandFromSocket(const int &socketID);
         
         virtual void didGetFileData(const char *inMessage,const Header &header);
         
@@ -363,7 +389,9 @@ namespace YorkNet {
         
         virtual void didGetFileList(std::map<std::string, FileListOne> ins, const int &socketID){};
         
-        virtual void didGetFileRequestList(std::map<std::string, FileListOne> ins, const int &socketID){};
+        virtual void didGetFileRequestList(std::map<std::string, FileListOne> ins, const int &socketID, const HeaderType &type){};
+        
+        virtual void didGetCommand(const CommandHeader &inCmd, const int &socketID){};
         
         
     private:
@@ -372,7 +400,6 @@ namespace YorkNet {
         
         std::map<std::string, SentingFile> _sentingFiles    = std::map<std::string, SentingFile>();
         std::map<std::string, SentingFile> _recivingFiles   = std::map<std::string, SentingFile>();
-  
         
         FileTypes getFileType(std::string ins);
         

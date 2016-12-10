@@ -108,6 +108,7 @@ namespace YorkNet {
         int64_t size = message.length();
         
         //strcpy(sentChar, words.c_str());
+        fcntl(sockID, F_SETFL,  O_NONBLOCK);
         if (send(sockID, sentChar, size + HEADER_LENGTH, 0) == -1) {
             delete [] sentChar;
             perror("Send error！");

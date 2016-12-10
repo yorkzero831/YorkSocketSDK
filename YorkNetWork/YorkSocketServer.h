@@ -25,12 +25,12 @@ namespace YorkNet {
         struct FileNeedToDo
         {
             std::vector<FileListOne> needToSend;
-            std::vector<FileListOne> needToRecived;
+            std::vector<FileListOne> needToReceive;
             
             FileNeedToDo()
             {
                 needToSend    = std::vector<FileListOne>();
-                needToRecived = std::vector<FileListOne>();
+                needToReceive = std::vector<FileListOne>();
             }
         };
         
@@ -45,7 +45,7 @@ namespace YorkNet {
         
         virtual void didGetFileList(std::map<std::string, FileListOne> ins, const int &socketID);
         
-        virtual void didGetFileRequestList(std::map<std::string, FileListOne> ins, const int &socketID);
+        //virtual void didGetFileRequestList(std::map<std::string, FileListOne> ins, const int &socketID);
         
 		
 	private:

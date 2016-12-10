@@ -153,6 +153,17 @@ namespace YorkNet {
                 
                 sentFileToSocket(id, "1", "json");
             }
+            else if(input == "sentFiles")
+            {
+                std::cout << "Input ClientID" << std::endl;
+                int id = 0;
+                std::cin >> id;
+                
+                LOOP(4)
+                {
+                    sentFileToSocket(id, "1", "json");
+                }
+            }
             
         commandSystem();
         //}
@@ -184,7 +195,7 @@ namespace YorkNet {
                 fileNeedToDoList.insert(std::pair<int, FileNeedToDo>(clientSocket,FileNeedToDo()));
 				//if (!fork())
 				{
-					SentMessageTo(clientSocket, "You are In!!",1);
+					//SentMessageTo(clientSocket, "You are In!!",1);
 					//exit(0);
 				}
                 
@@ -203,7 +214,7 @@ namespace YorkNet {
         
         while (1)
         {
-            std::this_thread::sleep_for(hearBeatC);
+            std::this_thread::sleep_for(hearBeatC/5);
             CheckerHeader checkHeader;
             size_t buf_Pointer                          = 0;
             char chectHeaderBuff[CHECKER_HEADER_LENGTH] = { 0 };
@@ -219,6 +230,7 @@ namespace YorkNet {
                         std::cout << key << " Removed" << std::endl;
                         clientSockets.erase(socketID);
                         close(clientSocket);
+                        delete waitingMessageThreads[socketID];
                         waitingMessageThreads.erase(socketID);
                         fileNeedToDoList.erase(socketID);
                         return;
@@ -257,9 +269,15 @@ namespace YorkNet {
                             getError(error);
                             break;
                         }
-                        case HeaderType::FILE_REQUEST :
+                        case HeaderType::FILE_REQUEST_NEED_TO_SEND :
                         {
-                            error = readFileRequestFromSocket(socketID);
+                            error = readFileRequestFromSocket(socketID, FILE_REQUEST_NEED_TO_SEND);
+                            getError(error);
+                            break;
+                        }
+                        case HeaderType::FILE_REQUEST_NEED_TO_RECIEVE :
+                        {
+                            error = readFileRequestFromSocket(socketID, FILE_REQUEST_NEED_TO_RECIEVE);
                             getError(error);
                             break;
                         }
@@ -302,6 +320,7 @@ namespace YorkNet {
         int64_t size = words.length();
         
 		//strcpy(sentChar, words.c_str());
+        fcntl(socketID, F_SETFL, O_NONBLOCK);
 		if (send(socketID, sentChar, size + HEADER_LENGTH, 0) == -1) {
 			perror("Send error！");
 //            std::map<std::string, int>::iterator it;
@@ -368,7 +387,7 @@ namespace YorkNet {
                 }
                 else if(inVersion > version)
                 {
-                    thisSocketNeedToDo.needToRecived.push_back(itor->second);
+                    thisSocketNeedToDo.needToReceive.push_back(itor->second);
                     itor->second.version = inVersion;
                     //tempList.erase(itor->first);
                 }
@@ -383,11 +402,14 @@ namespace YorkNet {
         
         for (itor = ins.begin(); itor != ins.end(); itor++)
         {
-            thisSocketNeedToDo.needToRecived.push_back(itor->second);
-            _fileList.insert(std::pair<std::string, FileListOne>(itor->first,itor->second));
+            thisSocketNeedToDo.needToReceive.push_back(itor->second);
+            //_fileList.insert(std::pair<std::string, FileListOne>(itor->first,itor->second));
         }
         
-        if(thisSocketNeedToDo.needToRecived.size() != 0)
+       
+        
+        //Server need to receive
+        if(thisSocketNeedToDo.needToReceive.size() != 0)
         {
             //add pieceinfo
             
@@ -395,39 +417,46 @@ namespace YorkNet {
             const char* saveData = getDataFromFileList(_fileList);
             
             int64_t length = strlen(saveData);
-            saveFile(saveData, "fileList", FileTypes::TXT, length);
+            //saveFile(saveData, "fileList", FileTypes::TXT, length);
             
-            const char* sentData = getDataFromFileList(thisSocketNeedToDo.needToRecived);
-            sentFileRequestToSocket(socketID, sentData, thisSocketNeedToDo.needToRecived.size());
+            const char* sentData = getDataFromFileList(thisSocketNeedToDo.needToReceive);
+            
+            sentFileRequestToSocket(socketID, sentData, thisSocketNeedToDo.needToReceive.size(), HeaderType::FILE_REQUEST_NEED_TO_SEND);
             
         }
-        else if(thisSocketNeedToDo.needToSend.size() != 0)
+        
+        std::this_thread::sleep_for(hearBeatC);
+        
+        if(thisSocketNeedToDo.needToSend.size() != 0)
         {
+            std::cout << "Will sent request" << std::endl;
+            
+            //thisSocketNeedToDo.needToSend.push_back(FileListOne("fileList",FileTypes::TXT,0));
+            std::this_thread::sleep_for(hearBeatC);
+            const char* sentData = getDataFromFileList(thisSocketNeedToDo.needToSend);
+            sentFileRequestToSocket(socketID, sentData, thisSocketNeedToDo.needToSend.size(), HeaderType::FILE_REQUEST_NEED_TO_RECIEVE);
+            
+            
             LOOP(thisSocketNeedToDo.needToSend.size())
             {
                 std::this_thread::sleep_for(hearBeatC);
+                //if(clientSockets.find(socketID) == clientSockets.end()){ return; }
                 sentFileToSocket(socketID, thisSocketNeedToDo.needToSend.at(ii).name, getStringByFileType(thisSocketNeedToDo.needToSend.at(ii).type) );
+                
             }
+            
+            std::this_thread::sleep_for(hearBeatC);
+            sentCommandToSocket(socketID, CommandTypes::FILE_NO_NEED_CHANGE);
         }
         else
         {
             std::cout << "Nothing Changed" << std::endl;
+            sentCommandToSocket(socketID, CommandTypes::FILE_NO_NEED_CHANGE);
         }
         
         std::cout << "Compare FileList Finished" << std::endl;
     }
     
-    void YorkSocketServer::didGetFileRequestList(std::map<std::string, FileListOne> ins, const int &socketID)
-    {
-        std::cout << "Get File Request List" << std::endl;
-        std::map<std::string, FileListOne>::iterator itor;
-        for (itor = ins.begin(); itor != ins.end(); itor++)
-        {
-            
-            //std::this_thread::sleep_for(hearBeatC);////
-            //sentFileToSocket(socketID, itor->second.name, getStringByFileType(itor->second.type));
-        }
-    }
     
     
     
