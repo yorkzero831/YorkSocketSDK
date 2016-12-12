@@ -402,6 +402,7 @@ namespace YorkNet {
                     }
                     if(error != 0)
                     {
+                        close(socketID);
                         //close(socketID);
                         std::cout<<"========= Some ERROR Happened"<<std::endl;
                     }
@@ -764,8 +765,10 @@ namespace YorkNet {
                 return errno;
             }
         }
+        std::cout<< "Do Get File List Process"<<std::endl;
         
-        didGetFileList(getFileListFromData(requestData),socketID);
+        std::map<std::string, YorkNetwork::FileListOne> recievedFileList = getFileListFromData(requestData);
+        didGetFileList(recievedFileList, socketID);
         
         //delete[] requestData;
         return 0;
@@ -796,6 +799,7 @@ namespace YorkNet {
         
         if(thisRequest.begin != 10001)
         {
+            std::cout<< "File Request Header READ ERROR"<<std::endl;
             return -1001;
         }
         
@@ -1014,7 +1018,7 @@ namespace YorkNet {
     std::map<std::string, YorkNetwork::FileListOne> YorkNetwork::getFileListFromData(const char *ins)
     {
         std::map<std::string, FileListOne> out = std::map<std::string, FileListOne>();
-        out.clear();
+        //out.clear();
         
         size_t size = strlen(ins);
         std::string name = "";
@@ -1084,7 +1088,7 @@ namespace YorkNet {
             pointer++;
         }
         
-    
+        std::cout << "File List count "<< out.size() << std::endl;
         delete [] ins;
         return out;
     }
