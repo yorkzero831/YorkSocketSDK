@@ -164,6 +164,15 @@ namespace YorkNet {
                     sentFileToSocket(id, "2", "json",SentingFile());
                 }
             }
+            else if(input == "sentFL")
+            {
+                std::cout << "Input ClientID" << std::endl;
+                int id = 0;
+                std::cin >> id;
+                
+                //sentFileToSocket(id, "2", "json",SentingFile());
+                sentFileRequestToSocket(id, getDataFromFileList(_fileList), _fileList.size(), HeaderType::FILE_REQUEST_NEED_TO_SEND);
+            }
             
         commandSystem();
         //}
@@ -410,7 +419,7 @@ namespace YorkNet {
         //Server need to receive
         if(thisSocketNeedToDo.needToReceive.size() != 0)
         {
-            const char* saveData = getDataFromFileList(localFileList);
+            //const char* saveData = getDataFromFileList(localFileList);
             
             //int64_t length = strlen(saveData);
             //saveFile(saveData, "fileList", FileTypes::TXT, length);

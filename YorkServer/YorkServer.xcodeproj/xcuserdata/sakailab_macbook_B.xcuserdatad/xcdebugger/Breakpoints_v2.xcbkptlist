@@ -6,15 +6,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../YorkNetWork/YorkSocketServer.cpp"
-            timestampString = "503151338.282596"
+            timestampString = "503245721.767629"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "420"
-            endingLineNumber = "420"
+            startingLineNumber = "429"
+            endingLineNumber = "429"
             landmarkName = "YorkSocketServer::didGetFileList(std::map&lt;std::string, FileListOne&gt; ins, const int &amp;socketID)"
             landmarkType = "7">
          </BreakpointContent>
@@ -90,11 +90,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../YorkNetWork/YorkNetwork.cpp"
-            timestampString = "503153000.799772"
+            timestampString = "503247392.967116"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "690"
-            endingLineNumber = "690"
+            startingLineNumber = "687"
+            endingLineNumber = "687"
             landmarkName = "YorkNetwork::readFileConformerFromSocket(const int &amp;socketID)"
             landmarkType = "7">
          </BreakpointContent>
@@ -106,11 +106,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../YorkNetWork/YorkNetwork.cpp"
-            timestampString = "503153000.799772"
+            timestampString = "503247392.967116"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "298"
-            endingLineNumber = "298"
+            startingLineNumber = "295"
+            endingLineNumber = "295"
             landmarkName = "YorkNetwork::sentCommandToSocket(const int &amp;socketID, const YorkNet::YorkNetwork::CommandTypes &amp;cmd)"
             landmarkType = "7">
          </BreakpointContent>
@@ -122,11 +122,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../YorkNetWork/YorkNetwork.cpp"
-            timestampString = "503153000.799772"
+            timestampString = "503247392.967116"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "632"
-            endingLineNumber = "632"
+            startingLineNumber = "629"
+            endingLineNumber = "629"
             landmarkName = "YorkNetwork::readFileFromSocket2(const int &amp;socketID, int *indexOfCheckedBlock)"
             landmarkType = "7">
          </BreakpointContent>
@@ -138,12 +138,56 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../YorkNetWork/YorkSocketServer.cpp"
-            timestampString = "503152379.371589"
+            timestampString = "503245721.767629"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "509"
-            endingLineNumber = "509"
-            landmarkName = "YorkSocketServer::didGetCommand(const YorkNet::YorkNetwork::CommandHeader &amp;inCmd, const int &amp;socketID)"
+            startingLineNumber = "518"
+            endingLineNumber = "518">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../YorkNetWork/YorkSocketServer.cpp"
+            timestampString = "503245721.767629"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "495"
+            endingLineNumber = "495"
+            landmarkName = "YorkSocketServer::waitForRequestStatus(const int&amp; socketID, std::map&lt;std::string, FileListOne&gt;list)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../YorkNetWork/YorkSocketServer.cpp"
+            timestampString = "503245721.767629"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "516"
+            endingLineNumber = "516">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../YorkNetWork/YorkSocketServer.cpp"
+            timestampString = "503245721.767629"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "496"
+            endingLineNumber = "496"
+            landmarkName = "YorkSocketServer::waitForRequestStatus(const int&amp; socketID, std::map&lt;std::string, FileListOne&gt;list)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -154,12 +198,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../YorkNetWork/YorkSocketServer.cpp"
-            timestampString = "503151338.282596"
+            timestampString = "503245721.767629"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "486"
-            endingLineNumber = "486"
-            landmarkName = "YorkSocketServer::waitForRequestStatus(const int&amp; socketID)"
+            startingLineNumber = "381"
+            endingLineNumber = "381"
+            landmarkName = "YorkSocketServer::didGetFileList(std::map&lt;std::string, FileListOne&gt; ins, const int &amp;socketID)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -170,12 +214,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../YorkNetWork/YorkSocketServer.cpp"
-            timestampString = "503152379.371589"
+            timestampString = "503245721.767629"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "507"
-            endingLineNumber = "507"
-            landmarkName = "YorkSocketServer::didGetCommand(const YorkNet::YorkNetwork::CommandHeader &amp;inCmd, const int &amp;socketID)"
+            startingLineNumber = "438"
+            endingLineNumber = "438"
+            landmarkName = "YorkSocketServer::didGetFileList(std::map&lt;std::string, FileListOne&gt; ins, const int &amp;socketID)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -185,13 +229,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../YorkNetWork/YorkSocketServer.cpp"
-            timestampString = "503151338.282596"
+            filePath = "../YorkNetWork/YorkNetwork.cpp"
+            timestampString = "503247392.967116"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "487"
-            endingLineNumber = "487"
-            landmarkName = "YorkSocketServer::waitForRequestStatus(const int&amp; socketID)"
+            startingLineNumber = "280"
+            endingLineNumber = "280"
+            landmarkName = "YorkNetwork::sentFileRequestToSocket(const int &amp;socketID, const char *fileRequestData, const int64_t &amp;fileCount, const HeaderType &amp;type)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

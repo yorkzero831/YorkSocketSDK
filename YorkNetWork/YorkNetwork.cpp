@@ -274,13 +274,10 @@ namespace YorkNet {
     int YorkNetwork::sentFileRequestToSocket(const int &socketID, const char *fileRequestData, const int64_t &fileCount, const HeaderType &type)
     {
         FileListHeader thisFRHeader = FileListHeader(strlen(fileRequestData), fileCount);
-        
         char *sentBuff = createBufferForFileList(thisFRHeader, fileRequestData, type);
-        
-        int64_t dataSize = strlen(fileRequestData);
-        
+    
         fcntl(socketID, F_SETFL,  O_NONBLOCK);
-        if(send(socketID, sentBuff, dataSize + FILES_LIST_LENGTH + CHECKER_HEADER_LENGTH, 0) < 0)
+        if(write(socketID, sentBuff, thisFRHeader.dataLength + FILES_LIST_LENGTH + CHECKER_HEADER_LENGTH) < 0)
         {
             getError(errno);
             
@@ -288,7 +285,7 @@ namespace YorkNet {
             std::cout << "Error on sending file"  << std::endl;
             return -1001;
         }
-        
+        //std::this_thread::sleep_for(heartBeatC);
         delete [] sentBuff;
         return 0;
     }
@@ -745,7 +742,7 @@ namespace YorkNet {
             return -1001;
         }
         
-        
+        std::this_thread::sleep_for(heartBeatC);
         char *requestData = new char[thisRequest.dataLength];
         
         fcntl(socketID, F_SETFL,  O_NONBLOCK);
