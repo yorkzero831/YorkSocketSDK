@@ -88,7 +88,7 @@ namespace YorkNet {
         void ListenToClient(int socketID, std::string key);
         void commandSystem();
         
-        void waitForRequestStatus(const int &socketID);
+        void waitForRequestStatus(const int &socketID, std::map<std::string, FileListOne>list);
         
         
 		

@@ -1,0 +1,29 @@
+{
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "E8BD60F878E2FC1DE2B8B4F433DD9310AB20B1EC" : 0,
+    "6B7F2399D6BD78EE538953C2D760F0348456AC36" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "FFE233AC-670D-4CF7-B213-A89B839697CC",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "E8BD60F878E2FC1DE2B8B4F433DD9310AB20B1EC" : "..\/StageCreator",
+    "6B7F2399D6BD78EE538953C2D760F0348456AC36" : ""
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "YorkServer",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "YorkServer.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/yorkzero831\/YorkSocketSDK.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "6B7F2399D6BD78EE538953C2D760F0348456AC36"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "ssh:\/\/192.168.100.29:10022\/coly_york\/StageCreator.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "E8BD60F878E2FC1DE2B8B4F433DD9310AB20B1EC"
+    }
+  ]
+}

@@ -77,12 +77,12 @@ namespace YorkNet {
         cmdSysThread = std::thread(&YorkNet::YorkSocketServer::commandSystem, this);
         cmdSysThread.detach();
 		//runServer();
-        std::this_thread::sleep_for(hearBeatC);
+        std::this_thread::sleep_for(heartBeatC);
         
         _fileList = getFileListFromData(getFileListDataFormFile());
 		
         while (true) {
-            std::this_thread::sleep_for(hearBeatC);
+            std::this_thread::sleep_for(heartBeatC);
         }
 		
 	}
@@ -91,7 +91,7 @@ namespace YorkNet {
     {
         //while (true)
         //{
-        std::this_thread::sleep_for(hearBeatC);
+        std::this_thread::sleep_for(heartBeatC);
         
             std::string input = "";
             std::cin >> input;
@@ -141,7 +141,7 @@ namespace YorkNet {
                 
                 //sentFileToSocket(id, "1", "json");
                 while (1) {
-                    std::this_thread::sleep_for(hearBeatC*100);
+                    std::this_thread::sleep_for(heartBeatC*100);
                     sentFileToSocket(id, "1", "json", SentingFile());
                 }
             }
@@ -176,7 +176,7 @@ namespace YorkNet {
 		
 		while (1)
 		{
-            std::this_thread::sleep_for(hearBeatC);
+            std::this_thread::sleep_for(heartBeatC);
             
 			sin_size = sizeof(struct sockaddr_in);
 			if ((clientSocket = accept(listenSocket, (struct sockaddr*)&remote_addr, &sin_size)) < 0)
@@ -215,7 +215,7 @@ namespace YorkNet {
         bool doneSend                               = false;
         while (1)
         {
-            std::this_thread::sleep_for(hearBeatC/5);
+            std::this_thread::sleep_for(heartBeatC/5);
             CheckerHeader checkHeader;
             size_t buf_Pointer                          = 0;
             char chectHeaderBuff[CHECKER_HEADER_LENGTH] = { 0 };
@@ -377,6 +377,7 @@ namespace YorkNet {
         clientFileRequestStatus.insert(std::pair<int, FileRequestStatus>());
         std::cout << "Get File List" << std::endl;
         //std::map<std::string, FileListOne> tempList = ins;
+        std::map<std::string, FileListOne> localFileList = _fileList;
         
         FileNeedToDo thisSocketNeedToDo =  fileNeedToDoList[socketID];
         std::map<std::string, FileListOne>::iterator itor;
@@ -411,21 +412,18 @@ namespace YorkNet {
         for (itor = ins.begin(); itor != ins.end(); itor++)
         {
             thisSocketNeedToDo.needToReceive.push_back(itor->second);
-            _fileList.insert(std::pair<std::string, FileListOne>(itor->first,itor->second));
+            localFileList.insert(std::pair<std::string, FileListOne>(itor->first,itor->second));
         }
         
-       std::cout << "Compare FileList Finished" << std::endl;
+        std::cout << "Compare FileList Finished" << std::endl;
         
         //Server need to receive
         if(thisSocketNeedToDo.needToReceive.size() != 0)
         {
-            //add pieceinfo
+            const char* saveData = getDataFromFileList(localFileList);
             
-            //
-            const char* saveData = getDataFromFileList(_fileList);
-            
-            int64_t length = strlen(saveData);
-            saveFile(saveData, "fileList", FileTypes::TXT, length);
+            //int64_t length = strlen(saveData);
+            //saveFile(saveData, "fileList", FileTypes::TXT, length);
             
             const char* sentData = getDataFromFileList(thisSocketNeedToDo.needToReceive);
             
@@ -437,28 +435,26 @@ namespace YorkNet {
             clientFileRequestStatus[socketID].recivedDone = true;
         }
         
-        std::this_thread::sleep_for(hearBeatC);
+        std::this_thread::sleep_for(heartBeatC);
         
         if(thisSocketNeedToDo.needToSend.size() != 0)
         {
             std::cout << "Will sent request" << std::endl;
             
-            thisSocketNeedToDo.needToSend.push_back(FileListOne("fileList",FileTypes::TXT,0));
-            std::this_thread::sleep_for(hearBeatC);
+            //thisSocketNeedToDo.needToSend.push_back(FileListOne("fileList",FileTypes::TXT,0));
+            std::this_thread::sleep_for(heartBeatC);
             const char* sentData = getDataFromFileList(thisSocketNeedToDo.needToSend);
             sentFileRequestToSocket(socketID, sentData, thisSocketNeedToDo.needToSend.size(), HeaderType::FILE_REQUEST_NEED_TO_RECIEVE);
             
             
             LOOP(thisSocketNeedToDo.needToSend.size())
             {
-                std::this_thread::sleep_for(hearBeatC);
-                //if(clientSockets.find(socketID) == clientSockets.end()){ return; }
+                std::this_thread::sleep_for(heartBeatC);
                 sentFileToSocket(socketID, thisSocketNeedToDo.needToSend.at(ii).name, getStringByFileType(thisSocketNeedToDo.needToSend.at(ii).type) ,SentingFile());
                 
             }
             
-            std::this_thread::sleep_for(hearBeatC);
-            //sentCommandToSocket(socketID, CommandTypes::FILE_NO_NEED_CHANGE);
+            std::this_thread::sleep_for(heartBeatC);
             clientFileRequestStatus[socketID].requestDone = true;
         }
         else
@@ -469,22 +465,23 @@ namespace YorkNet {
         if(thisSocketNeedToDo.needToSend.size() == 0 && thisSocketNeedToDo.needToReceive.size() == 0)
         {
             std::cout << "Nothing Changed" << std::endl;
+            std::this_thread::sleep_for(heartBeatC);
             sentCommandToSocket(socketID, CommandTypes::FILE_NO_NEED_CHANGE);
         }
         else
         {
-            std::thread waitForRequestCompate(&YorkNet::YorkSocketServer::waitForRequestStatus, this, socketID);
+            std::thread waitForRequestCompate(&YorkNet::YorkSocketServer::waitForRequestStatus, this, socketID, localFileList);
             waitForRequestCompate.detach();
         }
         
         
     }
     
-    void YorkSocketServer::waitForRequestStatus(const int& socketID)
+    void YorkSocketServer::waitForRequestStatus(const int& socketID, std::map<std::string, FileListOne>list)
     {
         while (1)
         {
-            std::this_thread::sleep_for(hearBeatC);
+            std::this_thread::sleep_for(heartBeatC);
             
             FileRequestStatus one = clientFileRequestStatus[socketID];
             if(waitingMessageThreads.find(socketID)== waitingMessageThreads.end())
@@ -494,11 +491,15 @@ namespace YorkNet {
             if(one.requestDone == true && one.recivedDone == true)
             {
                 sentCommandToSocket(socketID, CommandTypes::FILE_NO_NEED_CHANGE);
+                _fileList = list;
+                const char* saveData = getDataFromFileList(list);
+                int64_t length = strlen(saveData);
+                
+                saveFile(saveData, "fileList", FileTypes::TXT, length);
                 return;
             }
         }
     }
-    
     void YorkSocketServer::didGetCommand(const YorkNet::YorkNetwork::CommandHeader &inCmd, const int &socketID)
     {
 #ifdef GET_COMMAND_DEBUG

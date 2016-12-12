@@ -201,7 +201,7 @@ namespace YorkNet {
         if( (file_block_length = fread(buffer, sizeof(char), FILE_BUFFER_SIZE, fileR)) > 0)
         {
             
-            //std::this_thread::sleep_for(hearBeatC);
+            //std::this_thread::sleep_for(heartBeatC);
 #ifdef FILE_SENT_DEBUG
             std::cout << "file_block_length: " << file_block_length << std::endl;
             std::cout << "content: " << buffer << std::endl;
@@ -317,9 +317,9 @@ namespace YorkNet {
         while (1)
         {
             if(hostType == HostType::CLIENT)
-                std::this_thread::sleep_for(hearBeatC);
+                std::this_thread::sleep_for(heartBeatC);
             if(hostType == HostType::SERVER)
-                std::this_thread::sleep_for(hearBeatC);
+                std::this_thread::sleep_for(heartBeatC);
             
             CheckerHeader checkHeader;
             size_t buf_Pointer                          = 0;
@@ -564,39 +564,42 @@ namespace YorkNet {
             std::cout <<  "===========Received "<< thisHeader.indexOfBlock<<":"<<thisHeader.totalBlock << std::endl;
             std::cout << "content : "<< contextBuff<<std::endl;
 #endif
-            
-            SentingFile thisRecivedOne = SentingFile(thisHeader.tag,thisHeader.indexOfBlock);
-            char* fileConformer = createBufferForConformer(thisRecivedOne);
-            
-            fcntl(socketID, F_SETFL,  O_NONBLOCK);
-            if (send(socketID, fileConformer, CHECKER_HEADER_LENGTH + SENTING_FILE_H_LENGTH, 0) < 0)
+            if(thisHeader.indexOfBlock < thisHeader.totalBlock)
             {
-                size_t coutO = fileContextList->size();
-                LOOP(coutO)
-                {
-                    delete [] fileContextList->at(ii).data;
-                }
-                delete fileContextList;
+                SentingFile thisRecivedOne = SentingFile(thisHeader.tag,thisHeader.indexOfBlock);
+                char* fileConformer = createBufferForConformer(thisRecivedOne);
                 
-                if (errno == EWOULDBLOCK)
+                fcntl(socketID, F_SETFL,  O_NONBLOCK);
+                if (send(socketID, fileConformer, CHECKER_HEADER_LENGTH + SENTING_FILE_H_LENGTH, 0) < 0)
                 {
-                    std::cout<< "File Conformer Error1"<<std::endl;
-                    delete[] fileConformer;
-                    delete[] contextBuff;
-                    return errno;
+                    size_t coutO = fileContextList->size();
+                    LOOP(coutO)
+                    {
+                        delete [] fileContextList->at(ii).data;
+                    }
+                    delete fileContextList;
+                    
+                    if (errno == EWOULDBLOCK)
+                    {
+                        std::cout<< "File Conformer Error1"<<std::endl;
+                        delete[] fileConformer;
+                        delete[] contextBuff;
+                        return errno;
+                    }
+                    else
+                    {
+                        std::cout<< "File Conformer Error2"<<std::endl;
+                        delete[] fileConformer;
+                        //delete[] contextBuff;
+                        return errno;;
+                    }
                 }
-                else
-                {
-                    std::cout<< "File Conformer Error2"<<std::endl;
-                    delete[] fileConformer;
-                    //delete[] contextBuff;
-                    return errno;;
-                }
+                
+                delete[] fileConformer;
+                fileConformer = NULL;
+                //std::cout <<  "===========Will Receive "<< thisHeader.indexOfBlock<<":"<<thisHeader.totalBlock<< std::endl;
             }
             
-            delete[] fileConformer;
-            fileConformer = NULL;
-            //std::cout <<  "===========Will Receive "<< thisHeader.indexOfBlock<<":"<<thisHeader.totalBlock<< std::endl;
             
             
         }
@@ -714,7 +717,7 @@ namespace YorkNet {
     
     int YorkNetwork::readFileListFromSocket(const int &socketID)
     {
-        //std::this_thread::sleep_for(hearBeatC);
+        //std::this_thread::sleep_for(heartBeatC);
         char fileListHeaderBuff[FILES_LIST_LENGTH];
         
         fcntl(socketID, F_SETFL,  O_NONBLOCK);
@@ -821,6 +824,7 @@ namespace YorkNet {
         }
         
         std::map<std::string, FileListOne> getFileList = getFileListFromData(requestData);
+        
         if (getFileList.size() != thisRequest.count)
         {
             return -1001;
@@ -1015,74 +1019,72 @@ namespace YorkNet {
         size_t size = strlen(ins);
         std::string name = "";
         std::string type = "";
-        int version = 0;
+        std::string versionS = "";
         int caseFlag = 0;
-        char tempContainer[20];
+        char tempContainer[20] ={ 0 };
         int pointer = 0;
         bzero(tempContainer, 20);
-        LOOP(size+1)
+    
+        LOOP(size)
         {
-            //tempContainer[pointer] = ins[ii];
-            //name
-            if(caseFlag == 0)
+            
+            if(ins[ii] == '\n' || ins[ii] == '\r' || ii == pointer-1)
             {
-                if(ins[ii] == ' ')
+                
+                for (int i = 0; i < pointer; i++)
                 {
-                    name = tempContainer;
-                    pointer = 0;
-                    caseFlag ++;
-                    bzero(tempContainer, 20);
-                    
-                    continue;
-                }
-                else
-                {
-                    tempContainer[pointer] = ins[ii];
-                }
-            }
-            //type
-            else if (caseFlag == 1)
-            {
-                if(ins[ii] == ' ')
-                {
-                    if(name == "99")
+                    if(caseFlag == 0)
                     {
-                        int o = 10;
+                        if(tempContainer[i] == ' ')
+                        {
+                            caseFlag ++;
+                        }
+                        else
+                        {
+                            name += tempContainer[i];
+                        }
                     }
-                    type = tempContainer;
-                    pointer = 0;
-                    caseFlag ++;
-                    bzero(tempContainer, 20);
-                    continue;
-                }
-                else
-                {
-                    tempContainer[pointer] = ins[ii];
-                }
-            }
-            //version
-            else if (caseFlag == 2)
-            {
-                if(ins[ii] == '\r' || ii == size || ins[ii] == '\n')
-                {
+                    else if(caseFlag == 1)
+                    {
+                        if(tempContainer[i] == ' ')
+                        {
+                            caseFlag ++;
+                        }
+                        else
+                        {
+                            type += tempContainer[i];
+                        }
+                        
+                    }
+                    else if(caseFlag == 2)
+                    {
+                        versionS += tempContainer[i];
+                        if(i == pointer -1)
+                        {
+                            FileListOne oo = FileListOne(name,getFileType(type),std::atoi(versionS.c_str()));
+                            out.insert(std::pair<std::string, FileListOne>(name, oo));
+                            
+                            name        = "";
+                            type        = "";
+                            versionS    = "";
+                            caseFlag    = 0;
+                        }
+
+                    }
                     
-                    version = atoi(tempContainer);
-                    pointer = 0;
-                    FileListOne oo = FileListOne(name,getFileType(type),version);
-                    out.insert(std::pair<std::string, FileListOne>(name, oo));
-                    caseFlag = 0;
-                    bzero(tempContainer, 20);
-                    continue;
                 }
-                else
-                {
-                    tempContainer[pointer] = ins[ii];
-                }
+                
+                bzero(tempContainer, pointer+1);
+                pointer = -1;
             }
-            
+            else
+            {
+                tempContainer[pointer] = ins[ii];
+            }
             pointer++;
-            
         }
+        
+    
         delete [] ins;
         return out;
     }

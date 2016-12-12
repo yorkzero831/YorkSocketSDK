@@ -64,7 +64,7 @@ namespace YorkNet {
         
         while (!finishedFlag)
         {
-           std::this_thread::sleep_for(hearBeatC);
+           std::this_thread::sleep_for(heartBeatC);
         }
         
     }
@@ -74,7 +74,7 @@ namespace YorkNet {
         std::cout<<"Input your command"<<std::endl;
         while (true)
         {
-            std::this_thread::sleep_for(hearBeatC);
+            std::this_thread::sleep_for(heartBeatC);
             
             std::string input = "";
             std::cin >> input;
