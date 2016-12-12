@@ -234,6 +234,7 @@ namespace YorkNet {
                         delete waitingMessageThreads[socketID];
                         waitingMessageThreads.erase(socketID);
                         fileNeedToDoList.erase(socketID);
+                        clientFileRequestStatus.erase(socketID);
                         return;
                     }
                 }
@@ -320,9 +321,6 @@ namespace YorkNet {
 
 	void YorkSocketServer::SentMessageTo(int socketID, std::string words, int64_t tag, int64_t IOB, int64_t TOB)
 	{
-//		unsigned long sentSize = words.size();
-//		char sentChar[sentSize + 1];
-//        sentChar[sentSize] = endOfStream;
         char *sentChar = createBufferForMessage(words);
         int64_t size = words.length();
         
@@ -330,15 +328,7 @@ namespace YorkNet {
         fcntl(socketID, F_SETFL, O_NONBLOCK);
 		if (send(socketID, sentChar, size + HEADER_LENGTH, 0) == -1) {
 			perror("Send error！");
-//            std::map<std::string, int>::iterator it;
-//            for (it = clients.begin(); it != clients.end(); it++)
-//            {
-//                if(it->second == socketID)
-//                {
-//                    clients.erase(it);
-//                    return;
-//                }
-//            }
+
             clientSockets.erase(socketID);
 		}
 		//close(socketID);
@@ -374,7 +364,7 @@ namespace YorkNet {
     
     void YorkSocketServer::didGetFileList(std::map<std::string, FileListOne> ins, const int &socketID)
     {
-        clientFileRequestStatus.insert(std::pair<int, FileRequestStatus>());
+        clientFileRequestStatus.insert(std::pair<int, FileRequestStatus>(socketID, FileRequestStatus()));
         std::cout << "Get File List" << std::endl;
         //std::map<std::string, FileListOne> tempList = ins;
         std::map<std::string, FileListOne> localFileList = _fileList;
@@ -496,6 +486,8 @@ namespace YorkNet {
                 int64_t length = strlen(saveData);
                 
                 saveFile(saveData, "fileList", FileTypes::TXT, length);
+                
+                clientFileRequestStatus.erase(socketID);
                 return;
             }
         }
