@@ -113,112 +113,138 @@ namespace YorkNet {
     }
     
     //Function called when sent file to socket
-    int YorkNetwork::sentFileToSocket(const int &socketID, std::string fileName, std::string fileType)
+    int YorkNetwork::sentFileToSocket(const int &socketID, std::string fileName, std::string fileType, const YorkNet::YorkNetwork::SentingFile &fileConformerH)
     {
+        std::string fileUniName ;
         
-        bool isFirstTime =true;
+        int64_t fileBlockPos;
+        int64_t fileBlockTotal;
+        int64_t fileSize;
+        FileTypes fileTypeT;
+        int64_t thisBlockNum;
+        int64_t fid;
         
-        std::string filePath       = fileName + "." + fileType;
-        std::string fileAbslutPath = getDirPath(filePath);
-        
-        // count fileBlock sent
-        int64_t fileSize = getFileSize(fileAbslutPath);
-        
-        char buffer[FILE_BUFFER_SIZE];
-        
-        size_t fileBlockTotal = fileSize/FILE_BUFFER_SIZE;
-        if(fileSize%FILE_BUFFER_SIZE > 0)
-            fileBlockTotal++;
-        
-        FileTypes fileTypeT = getFileType(fileType);
-        
-        FILE *fileR;
-        
-        if(fileTypeT == FileTypes::TXT || fileTypeT == FileTypes::JSON || fileTypeT == FileTypes::NONE)
+        if(fileConformerH.fileID == -1)
         {
-            fileR = std::fopen(fileAbslutPath.c_str(), "r");
+            _fileID++;
+            fid = _fileID;
+            //put this file into sentingFile list
+            fileUniName = "local_file_" + std::to_string(_fileID);
         }
         else
         {
-            fileR = std::fopen(fileAbslutPath.c_str(), "rb");
+            fid = fileConformerH.fileID;
+            fileUniName = "local_file_" + std::to_string(fid);
         }
         
+        FILE *fileR;
         
-        if(fileR == NULL)
+        if(_openingFiles.find(fileUniName)== _openingFiles.end())
         {
-            fclose(fileR);
-            std::cout << "Can not OpenFile "<< filePath << std::endl;
-            return -1001;
-        }
-        
-        
-        int64_t thisBlockNum = 0;
-        
-        bzero(buffer, FILE_BUFFER_SIZE);
-        int file_block_length = 0;
+            std::string filePath       = fileName + "." + fileType;
+            std::string fileAbslutPath = getDirPath(filePath);
+            
+            // count fileBlock sent
+            fileSize = getFileSize(fileAbslutPath);
 
-        
-        _fileID++;
-        //put this file into sentingFile list
-        std::string fileUniName = "local_file_" + std::to_string(_fileID);
-        
-        
-        while( (file_block_length = fread(buffer, sizeof(char), FILE_BUFFER_SIZE, fileR)) > 0)
-        {
+            fileBlockTotal = fileSize/FILE_BUFFER_SIZE;
+            if(fileSize%FILE_BUFFER_SIZE > 0)
+                fileBlockTotal++;
             
-            //std::this_thread::sleep_for(hearBeatC);
+            fileTypeT = getFileType(fileType);
             
-            std::cout << "file_block_length: " << file_block_length << std::endl;
-            //std::cout << "content1: " << buffer << std::endl;
-            thisBlockNum ++;
             
-            if(!isFirstTime)
+            
+            if(fileTypeT == FileTypes::TXT || fileTypeT == FileTypes::JSON || fileTypeT == FileTypes::NONE)
             {
-                while ( _sentingFiles[fileUniName].blockIndex - thisBlockNum != -1)
-                {
-                    std::this_thread::sleep_for(hearBeatC/10);
-                }
+                fileR = std::fopen(fileAbslutPath.c_str(), "r");
             }
             else
             {
-                SentingFile thisSentingFile = SentingFile(_fileID,-1);
-                _sentingFiles.insert(std::pair<std::string,SentingFile>(fileUniName,thisSentingFile));
-                isFirstTime = false;
+                fileR = std::fopen(fileAbslutPath.c_str(), "rb");
             }
             
             
+            if(fileR == NULL)
+            {
+                fclose(fileR);
+                std::cout << "Can not OpenFile "<< filePath << std::endl;
+                return -1001;
+            }
             
+            _openingFiles.insert(std::pair<std::string, OpeningFile>(fileUniName, OpeningFile(fileR, fileName, fileBlockTotal, fileSize, fileTypeT)));
+            
+            _sentingFiles.insert(std::pair<std::string, SentingFile>(fileUniName, SentingFile(fid,0)));
+            fileBlockPos = 0;
+            thisBlockNum = 0;
+        }
+        else
+        {
+            fileR           = _openingFiles[fileUniName].file;
+            fileSize        = _openingFiles[fileUniName].fileSize;
+            fileBlockTotal  = _openingFiles[fileUniName].indexCount;
+            fileTypeT       = _openingFiles[fileUniName].filetype;
+            thisBlockNum    = _sentingFiles[fileUniName].blockIndex;
+            fileBlockPos    = thisBlockNum * FILE_BUFFER_SIZE;
+            
+            
+            fseek(fileR, fileBlockPos, SEEK_SET);
+        }
+        
+        char buffer[FILE_BUFFER_SIZE];
+        
+        //int64_t thisBlockNum = _sentingFiles[fileUniName].blockIndex ;
+        
+        bzero(buffer, FILE_BUFFER_SIZE);
+        int file_block_length = 0;
+       
+        if( (file_block_length = fread(buffer, sizeof(char), FILE_BUFFER_SIZE, fileR)) > 0)
+        {
+            
+            //std::this_thread::sleep_for(hearBeatC);
+#ifdef FILE_SENT_DEBUG
+            std::cout << "file_block_length: " << file_block_length << std::endl;
+            std::cout << "content: " << buffer << std::endl;
+#endif
+            thisBlockNum ++;
+            
+           
             int64_t blockLenth;
             if(thisBlockNum < fileBlockTotal){ blockLenth = FILE_BUFFER_SIZE;}
             else if (thisBlockNum == fileBlockTotal) { blockLenth = fileSize%FILE_BUFFER_SIZE ;}
             
-            char *sentChar = createBufferForFile(buffer, _fileID, fileBlockTotal, thisBlockNum, fileName, fileTypeT, blockLenth);
+            char *sentChar = createBufferForFile(buffer, fid, fileBlockTotal, thisBlockNum, fileName, fileTypeT, blockLenth);
             int64_t sentLenth = strlen(buffer);
             
             fcntl(socketID, F_SETFL,  O_NONBLOCK);
             if(send(socketID, sentChar, blockLenth + HEADER_LENGTH + CHECKER_HEADER_LENGTH, 0) < 0)
             {
                 getError(errno);
-
-                delete[] sentChar;
-                std::cout << "Error on sending file"  << std::endl;
-                break;
                 
+                delete[] sentChar;
+                fclose(fileR);
+                _sentingFiles.erase(fileUniName);
+                _openingFiles.erase(fileUniName);
+                
+                std::cout << "Error on sending file"  << std::endl;
+                return -1001;
             }
-            std::cout <<  "===========Send "<< thisBlockNum<<":"<< fileBlockTotal<< std::endl;
+            //std::cout <<  "===========Send "<< thisBlockNum<<":"<< fileBlockTotal<< std::endl;
             
             delete[] sentChar;
             
             bzero(buffer, FILE_BUFFER_SIZE);
             
-            
-            
         }
-        //SentMessageTo(socketID, "",1);
-        _sentingFiles.erase(fileUniName);
         
-        fclose(fileR);
-        std::cout << "File: "<< filePath<<" Transfer finished"  << std::endl;
+        if(thisBlockNum == fileBlockTotal)
+        {
+            fclose(fileR);
+            _sentingFiles.erase(fileUniName);
+            _openingFiles.erase(fileUniName);
+            std::cout<<"Sent File"<<fileName<<"."<<fileType<<std::endl;
+        }
+
         
         return 0;
     }
@@ -287,7 +313,6 @@ namespace YorkNet {
     void YorkNetwork::readFromSocket(const int &socketID)
     {
         int *checkedFileConformer                   = 0;
-        std::string *fileName                       = new std::string("");
         
         while (1)
         {
@@ -335,7 +360,7 @@ namespace YorkNet {
                         }
                         case HeaderType::FILE_TYPE :
                         {
-                            error = readFileFromSocket(socketID, checkedFileConformer);
+                            error = readFileFromSocket2(socketID, checkedFileConformer);
                             getError(error);
                             break;
                         }
@@ -440,14 +465,12 @@ namespace YorkNet {
         return 0;
     }
     
-    int YorkNetwork::readFileFromSocket(const int &socketID, int *indexOfCheckedBlock)
+    int YorkNetwork::readFileFromSocket2(const int &socketID, int *indexOfCheckedBlock)
     {
-        std::vector<RecivedData>fileContextList     = std::vector<RecivedData>();
+        std::vector<RecivedData>*fileContextList;
         char headerBuff[HEADER_LENGTH]              = { 0 };
         char checkerBuff[CHECKER_HEADER_LENGTH]     = { 0 };
-        char *contextBuff                           = new char[0];
-        
-        bool fileDataBegin                          = false;
+        char *contextBuff                           = nullptr;
         int64_t lastBlockIndex                      = 0;
         std::string thisFileName                    = "";
         FileTypes   thisFileType                    = FileTypes::NONE;
@@ -458,198 +481,182 @@ namespace YorkNet {
         std::string fileUniName                            = "";
         size_t buf_Pointer                                 = 0;
         
-        while (1)
+        fcntl(socketID, F_SETFL,  O_NONBLOCK);
+        if (read(socketID, &headerBuff[0], HEADER_LENGTH) <= 0)
         {
-            //std::this_thread::sleep_for(hearBeatC);
-            if(fileDataBegin)
+            if (errno == EWOULDBLOCK)
             {
-                //std::this_thread::sleep_for(hearBeatC);
-                buf_Pointer = 0;
-                while (buf_Pointer < CHECKER_HEADER_LENGTH)
-                {
-                    std::this_thread::sleep_for(hearBeatC/3);
-                    fcntl(socketID, F_SETFL,  O_NONBLOCK);
-                    if (read(socketID, &checkerBuff[buf_Pointer], 1) <= 0)
-                    {
-                        if (errno == EWOULDBLOCK){ continue; }
-                        else
-                        {
-                            std::cout<< "No message comes from server"<<std::endl;
-                            delete [] contextBuff;
-                            return -1001;
-                        }
-                    }
-                    //std::this_thread::sleep_for(hearBeatC/10);
-                    if (buf_Pointer == CHECKER_HEADER_LENGTH-1)
-                    {
-                        memcpy(&checkHeader, checkerBuff, CHECKER_HEADER_LENGTH);
-                        if(checkHeader.headerType != HeaderType::FILE_TYPE)
-                        {
-                            delete [] contextBuff;
-                            return -1001;
-                        }
-                    }
-                    buf_Pointer++;
-                }
-            }
-            
-            fcntl(socketID, F_SETFL,  O_NONBLOCK);
-            if (read(socketID, &headerBuff[0], HEADER_LENGTH) <= 0)
-            {
-                if (errno == EWOULDBLOCK)
-                {
-                    std::cout<< "None FileHeader Data Found"<<std::endl;
-                    delete[] contextBuff;
-                    return errno;
-                    //break;
-                }
-                else
-                {
-                    std::cout<< "Error On Read FileHeader Data"<<std::endl;
-                    delete[] contextBuff;
-                    return errno;
-                }
-            }
-            
-            memcpy(&thisHeader, headerBuff, HEADER_LENGTH);
-            if(thisHeader.begin!=10001 || thisHeader.length < 0 || thisHeader.totalBlock < thisHeader.indexOfBlock)
-            {
+                std::cout<< "None FileHeader Data Found"<<std::endl;
                 delete[] contextBuff;
-                return -1001;
-            }
-            
-            if(thisHeader.fileName != "")
-            {
-                if( !fileDataBegin )
-                {
-                    fileDataBegin   = true;
-                    thisFileName    = thisHeader.fileName;
-                    thisFileType    = thisHeader.fileType;
-                    
-                    fileUniName = std::to_string(socketID) + "_" + std::to_string(thisHeader.tag);
-                    SentingFile thisRecivingOne = SentingFile(thisHeader.tag, thisHeader.indexOfBlock);
-                    _recivingFiles.insert(std::pair<std::string, SentingFile>(fileUniName, thisRecivingOne));
-                }
+                return errno;
+                //break;
             }
             else
             {
+                std::cout<< "Error On Read FileHeader Data"<<std::endl;
                 delete[] contextBuff;
-                return -1001;
+                return errno;
+            }
+        }
+        memcpy(&thisHeader, headerBuff, HEADER_LENGTH);
+        if(thisHeader.begin!=10001 || thisHeader.length < 0 || thisHeader.totalBlock < thisHeader.indexOfBlock)
+        {
+            delete[] contextBuff;
+            return -1001;
+        }
+        
+        if(thisHeader.fileName != "")
+        {
+            thisFileName    = thisHeader.fileName;
+            thisFileType    = thisHeader.fileType;
+            
+            fileUniName = std::to_string(socketID) + "_" + std::to_string(thisHeader.tag);
+            if(_recivingFiles.find(fileUniName) == _recivingFiles.end())
+            {
+                SentingFile thisRecivingOne = SentingFile(thisHeader.tag, thisHeader.indexOfBlock);
+                _recivingFiles.insert(std::pair<std::string, SentingFile>(fileUniName, thisRecivingOne));
+                
+                fileContextList = new std::vector<RecivedData>();
+                _recivingDatas.insert(std::pair<std::string, std::vector<RecivedData>*>(fileUniName, fileContextList));
+            }
+            else
+            {
+                fileContextList = _recivingDatas[fileUniName];
             }
             
-            contextBuff = new char[thisHeader.length];
+        }
+        else
+        {
+            delete[] contextBuff;
+            return -1001;
+        }
+        
+        contextBuff = new char[thisHeader.length];
+        
+        fcntl(socketID, F_SETFL,  O_NONBLOCK);
+        if (read(socketID, &contextBuff[0], thisHeader.length) <= 0)
+        {
+            if (errno == EWOULDBLOCK)
+            {
+                std::cout<< "None File Data Found"<<std::endl;
+                delete[] contextBuff;
+                return errno;
+            }
+            else
+            {
+                std::cout<< "Error On Read File Data"<<std::endl;
+                delete[] contextBuff;
+                return errno;;
+            }
+        }
+        
+        if(thisFileName == thisHeader.fileName && thisFileType == thisHeader.fileType)
+        {
+//            if(lastBlockIndex > thisHeader.indexOfBlock)
+//            {
+//                delete[] contextBuff;
+//                return -1001;
+//            }
+            
+            lastBlockIndex = thisHeader.indexOfBlock;
+            fileContextList->push_back(RecivedData(thisHeader,contextBuff));
+#ifdef FILE_RECIEVE_DEBUG
+            std::cout <<  "===========Received "<< thisHeader.indexOfBlock<<":"<<thisHeader.totalBlock << std::endl;
+            std::cout << "content : "<< contextBuff<<std::endl;
+#endif
+            
+            SentingFile thisRecivedOne = SentingFile(thisHeader.tag,thisHeader.indexOfBlock);
+            char* fileConformer = createBufferForConformer(thisRecivedOne);
             
             fcntl(socketID, F_SETFL,  O_NONBLOCK);
-            if (read(socketID, &contextBuff[0], thisHeader.length) <= 0)
+            if (send(socketID, fileConformer, CHECKER_HEADER_LENGTH + SENTING_FILE_H_LENGTH, 0) < 0)
             {
+                size_t coutO = fileContextList->size();
+                LOOP(coutO)
+                {
+                    delete [] fileContextList->at(ii).data;
+                }
+                delete fileContextList;
+                
                 if (errno == EWOULDBLOCK)
                 {
-                    std::cout<< "None File Data Found"<<std::endl;
+                    std::cout<< "File Conformer Error1"<<std::endl;
+                    delete[] fileConformer;
                     delete[] contextBuff;
                     return errno;
                 }
                 else
                 {
-                    std::cout<< "Error On Read File Data"<<std::endl;
-                    delete[] contextBuff;
+                    std::cout<< "File Conformer Error2"<<std::endl;
+                    delete[] fileConformer;
+                    //delete[] contextBuff;
                     return errno;;
                 }
             }
             
-            if(fileDataBegin && thisFileName == thisHeader.fileName && thisFileType == thisHeader.fileType)
+            delete[] fileConformer;
+            fileConformer = NULL;
+            //std::cout <<  "===========Will Receive "<< thisHeader.indexOfBlock<<":"<<thisHeader.totalBlock<< std::endl;
+            
+            
+        }
+
+        if(thisHeader.indexOfBlock == thisHeader.totalBlock)
+        {
+            int64_t blockCount = thisHeader.totalBlock;
+            int64_t thisfileLength;
+            if(blockCount > 1)
             {
-                if(lastBlockIndex > thisHeader.indexOfBlock)
+                thisfileLength = FILE_BUFFER_SIZE * ( blockCount -1 );
+                thisfileLength += fileContextList->at(blockCount-1).header.length;
+            }
+            else
+            {
+                thisfileLength = thisHeader.length;
+            }
+            char* fileDataTotal = new char[thisfileLength];
+            
+            int64_t filePostionPointer = 0;
+            LOOP(thisHeader.totalBlock)
+            {
+                //Index error
+                if(fileContextList->at(ii).header.indexOfBlock != (ii +1))
                 {
+                    std::cout <<  "Recived file index error:" << std::endl;
                     delete[] contextBuff;
+                    delete[] fileDataTotal;
+                    delete fileContextList;
+                    for (long i = ii; i < thisHeader.totalBlock; i++)
+                    {
+                        //Problem;
+                        //delete [] fileContextList->at(i).data;
+                    }
                     return -1001;
                 }
                 
-                lastBlockIndex = thisHeader.indexOfBlock;
+                memcpy(fileDataTotal+filePostionPointer, fileContextList->at(ii).data, fileContextList->at(ii).header.length);
+                filePostionPointer += fileContextList->at(ii).header.length;
                 
-                fileContextList.push_back(RecivedData(thisHeader,contextBuff));
-                std::cout <<  "===========Received "<< thisHeader.indexOfBlock<<":"<<thisHeader.totalBlock << std::endl;
-                //std::cout << "content : "<< contextBuff<<std::endl;
-                
-                SentingFile thisRecivedOne = SentingFile(thisHeader.tag,thisHeader.indexOfBlock);
-                char* fileConformer = createBufferForConformer(thisRecivedOne);
-                
-                //std::this_thread::sleep_for(hearBeatC);
-                fcntl(socketID, F_SETFL,  O_NONBLOCK);
-                if (send(socketID, fileConformer, CHECKER_HEADER_LENGTH + SENTING_FILE_H_LENGTH, 0) < 0)
-                {
-                    size_t coutO = fileContextList.size();
-                    LOOP(coutO)
-                    {
-                        delete [] fileContextList.at(ii).data;
-                    }
-                    if (errno == EWOULDBLOCK)
-                    {
-                        std::cout<< "File Conformer Error1"<<std::endl;
-                        delete[] fileConformer;
-                        delete[] contextBuff;
-                        return errno;
-                    }
-                    else
-                    {
-                        std::cout<< "File Conformer Error2"<<std::endl;
-                        delete[] fileConformer;
-                        //delete[] contextBuff;
-                        return errno;;
-                    }
-                }
-                //delete header buff pointer
-                delete[] fileConformer;
-                //std::cout <<  "===========Will Receive "<< thisHeader.indexOfBlock<<":"<<thisHeader.totalBlock<< std::endl;
-                
-                if(thisHeader.indexOfBlock == thisHeader.totalBlock)
-                {
-                    int64_t blockCount = thisHeader.totalBlock;
-                    int64_t thisfileLength;
-                    if(blockCount > 2)
-                    {
-                        thisfileLength = FILE_BUFFER_SIZE * ( blockCount -1 );
-                        thisfileLength += fileContextList.at(blockCount-1).header.length;
-                    }
-                    else
-                    {
-                        thisfileLength = thisHeader.length;
-                    }
-                    char* fileDataTotal = new char[thisfileLength];
-                    
-                    int64_t filePostionPointer = 0;
-                    LOOP(thisHeader.totalBlock)
-                    {
-                        //Index error
-                        if(fileContextList.at(ii).header.indexOfBlock != (ii +1))
-                        {
-                            std::cout <<  "Recived file index error:" << std::endl;
-                            delete[] contextBuff;
-                            delete[] fileDataTotal;
-                            return -1001;
-                        }
-                        
-                        memcpy(fileDataTotal+filePostionPointer, fileContextList.at(ii).data, fileContextList.at(ii).header.length);
-                        filePostionPointer += fileContextList.at(ii).header.length;
-                        
-                        delete[] fileContextList.at(ii).data;
-                        
-                        
-                        fileContextList.clear();
-                    }
-                    Header outHeader = Header(thisHeader.tag,thisfileLength,1,1,thisFileName,thisHeader.fileType);
-                    //std::cout <<  "Recived file data "<<thisHeader.fileName << std::endl;
-                    didGetFileData(fileDataTotal, outHeader);
-                    
-                    _recivingFiles.erase(fileUniName);
-                    
-                    fileContextList.clear();
-                    //delete[] contextBuff;
-                    return 0;
-                    
-                }
+                delete[] fileContextList->at(ii).data;
+                fileContextList->at(ii).data = NULL;
             }
-
+            //delete[] contextBuff;
+            
+            Header outHeader = Header(thisHeader.tag,thisfileLength,1,1,thisFileName,thisHeader.fileType);
+            //std::cout <<  "Recived file data "<<thisHeader.fileName << std::endl;
+            didGetFileData(fileDataTotal, outHeader);
+            
+            _recivingFiles.erase(fileUniName);
+            
+            fileContextList->clear();
+            delete fileContextList;
+            
+            _recivingDatas.erase(fileUniName);
+            //delete[] contextBuff;
+            return 0;
+            
         }
+
         
         return 0;
     }
@@ -680,7 +687,7 @@ namespace YorkNet {
         // to download next block
         //thisSentingFile.blockIndex ++;
         
-        std::cout<<"target has recived "<<thisSentingFile.blockIndex<<std::endl;
+        //std::cout<<"target has recived "<<thisSentingFile.blockIndex<<std::endl;
         
         std::string fileUniName = "local_file_" + std::to_string(thisSentingFile.fileID);
         if(_sentingFiles.find(fileUniName) != _sentingFiles.end())
@@ -693,6 +700,14 @@ namespace YorkNet {
                 std::cout<< "Error On Checking Senting List"<<std::endl;
         }
         //if(_sentingFiles)
+        if(_openingFiles.find(fileUniName)!= _openingFiles.end())
+        {
+            OpeningFile thisOpeningFile = _openingFiles[fileUniName];
+            sentFileToSocket(socketID, thisOpeningFile.fileName, getStringByFileType(thisOpeningFile.filetype) , thisSentingFile);
+            
+        }
+        
+        
         
         return 0;
     }

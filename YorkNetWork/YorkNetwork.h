@@ -5,8 +5,18 @@
  *      Author: yorkzero8
  */
 
+
+
 #ifndef YORKNETWORK_H_
 #define YORKNETWORK_H_
+
+
+//#define FILE_SENT_DEBUG         0;
+//#define FILE_RECIEVE_DEBUG      0;
+//#define GET_COMMAND_DEBUG       0;
+//#define SENTMESSAGE_DEBUG       0;
+
+
 
 #define DEFULT_PORT             10832
 #define  MAX_BUFFER_SIZE        2120
@@ -100,6 +110,7 @@ namespace YorkNet {
         {
             NONE_COMMAND,
             FILE_NO_NEED_CHANGE,
+            FILE_RECIECE_COMPLETED
         };
         
         enum FileState
@@ -164,22 +175,6 @@ namespace YorkNet {
             {
                 begin  = -1;
                 length = -1;
-            }
-        };
-        
-        struct FileConformerHeader
-        {
-            int64_t begin;
-            int64_t indexOfFileBlock;
-            FileConformerHeader(const int64_t &IOB)
-            {
-                begin            = 10001;
-                indexOfFileBlock = IOB;
-            }
-            FileConformerHeader()
-            {
-                begin            = -1;
-                indexOfFileBlock = -1;
             }
         };
         
@@ -317,6 +312,31 @@ namespace YorkNet {
             }
         };
         
+        struct OpeningFile
+        {
+            FILE* file;
+            std::string fileName;
+            int64_t indexCount;
+            int64_t fileSize;
+            FileTypes filetype;
+            
+            OpeningFile()
+            {
+                file        = nullptr;
+                indexCount  = -1;
+                fileSize    = -1;
+            }
+            OpeningFile(FILE* f, std::string fn, const int64_t& ic, const int64_t& fs, const FileTypes& ft)
+            {
+                file        = f;
+                fileName    = fn;
+                indexCount  = ic;
+                fileSize    = fs;
+                filetype    = ft;
+            }
+            
+        };
+        
         HostType hostType = HostType::NOTYPE;
         
         std::map<std::string, FileListOne> _fileList        = std::map<std::string, FileListOne>();
@@ -341,7 +361,9 @@ namespace YorkNet {
         
         size_t getFileSize(const std::string& fileName);
         
-        int sentFileToSocket(const int &socketID, std::string fileName, std::string fileType);
+        //int sentFileToSocket(const int &socketID, std::string fileName, std::string fileType);
+        
+        int sentFileToSocket(const int &socketID, std::string fileName, std::string fileType, const SentingFile &fileConformerH);
         
         int sentFileListToSocket(const int &socketID, const char* fileRequestData, const int64_t &fileCount);
         
@@ -353,7 +375,9 @@ namespace YorkNet {
         
         virtual int readMessageFromSocket(const int &socketID);
         
-        virtual int readFileFromSocket(const int &socketID, int *indexOfCheckedBlock);
+        //virtual int readFileFromSocket(const int &socketID, int *indexOfCheckedBlock);
+        
+        virtual int readFileFromSocket2(const int &socketID, int *indexOfCheckedBlock);
         
         virtual int readFileConformerFromSocket(const int &socketID);
         
@@ -400,6 +424,10 @@ namespace YorkNet {
         
         std::map<std::string, SentingFile> _sentingFiles    = std::map<std::string, SentingFile>();
         std::map<std::string, SentingFile> _recivingFiles   = std::map<std::string, SentingFile>();
+        
+        std::map<std::string, OpeningFile> _openingFiles    = std::map<std::string, OpeningFile>();
+        
+        std::map<std::string, std::vector<RecivedData>*> _recivingDatas = std::map<std::string, std::vector<RecivedData>*>();
         
         FileTypes getFileType(std::string ins);
         

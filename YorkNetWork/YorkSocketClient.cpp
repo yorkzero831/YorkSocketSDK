@@ -88,7 +88,7 @@ namespace YorkNet {
             }
             else if(input == "sentFile")
             {
-                sentFileToSocket(sockID, "2", "json");
+                sentFileToSocket(sockID, "2", "json", SentingFile());
             }
             input = "";
         }

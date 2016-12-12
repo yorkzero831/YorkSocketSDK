@@ -34,6 +34,17 @@ namespace YorkNet {
             }
         };
         
+        struct FileRequestStatus
+        {
+            bool requestDone;
+            bool recivedDone;
+            FileRequestStatus()
+            {
+                requestDone = false;
+                recivedDone = false;
+            }
+        };
+        
         
 		YorkSocketServer();
 		~YorkSocketServer();
@@ -46,7 +57,7 @@ namespace YorkNet {
         virtual void didGetFileList(std::map<std::string, FileListOne> ins, const int &socketID);
         
         //virtual void didGetFileRequestList(std::map<std::string, FileListOne> ins, const int &socketID);
-        
+        virtual void didGetCommand(const CommandHeader &inCmd, const int &socketID);
 		
 	private:
 		std::thread connectThread;
@@ -68,12 +79,16 @@ namespace YorkNet {
         //std::map<std::string, int> clients              = std::map<std::string, int>();
         std::map<int, FileNeedToDo> fileNeedToDoList    = std::map<int, FileNeedToDo>();
         std::map<int, std::string> clientSockets        = std::map<int, std::string>();
+        
+        std::map<int, FileRequestStatus> clientFileRequestStatus = std::map<int, FileRequestStatus> ();
 
 		void bindServer();
 		void runServer();
         //void waitingMessage(int socketID, std::string key);
         void ListenToClient(int socketID, std::string key);
         void commandSystem();
+        
+        void waitForRequestStatus(const int &socketID);
         
         
 		
