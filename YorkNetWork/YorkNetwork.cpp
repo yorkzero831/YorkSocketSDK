@@ -764,7 +764,7 @@ namespace YorkNet {
         }
         std::cout<< "Do Get File List Process"<<std::endl;
         
-        std::map<std::string, YorkNetwork::FileListOne> recievedFileList = getFileListFromData(requestData);
+        std::map<std::string, YorkNetwork::FileListOne>* recievedFileList = getFileListFromData(requestData);
         didGetFileList(recievedFileList, socketID);
         
         //delete[] requestData;
@@ -802,7 +802,7 @@ namespace YorkNet {
         
         if(thisRequest.count == 0)
         {
-            std::map<std::string, FileListOne> getFileList;
+            std::map<std::string, FileListOne>* getFileList;
             didGetFileRequestList(getFileList, socketID, type);
             return 0;
         }
@@ -824,9 +824,9 @@ namespace YorkNet {
             }
         }
         
-        std::map<std::string, FileListOne> getFileList = getFileListFromData(requestData);
+        std::map<std::string, FileListOne>* getFileList = getFileListFromData(requestData);
         
-        if (getFileList.size() != thisRequest.count)
+        if (getFileList->size() != thisRequest.count)
         {
             return -1001;
         }
@@ -1012,9 +1012,9 @@ namespace YorkNet {
         return out;
     }
     
-    std::map<std::string, YorkNetwork::FileListOne> YorkNetwork::getFileListFromData(const char *ins)
+    std::map<std::string, YorkNetwork::FileListOne>* YorkNetwork::getFileListFromData(const char *ins)
     {
-        std::map<std::string, FileListOne> out = std::map<std::string, FileListOne>();
+        std::map<std::string, FileListOne> *out = new std::map<std::string, FileListOne>();
         //out.clear();
         
         size_t size = strlen(ins);
@@ -1063,7 +1063,7 @@ namespace YorkNet {
                         if(i == pointer -1)
                         {
                             FileListOne oo = FileListOne(name,getFileType(type),std::atoi(versionS.c_str()));
-                            out.insert(std::pair<std::string, FileListOne>(name, oo));
+                            out->insert(std::pair<std::string, FileListOne>(name, oo));
                             
                             name        = "";
                             type        = "";
@@ -1085,7 +1085,7 @@ namespace YorkNet {
             pointer++;
         }
         
-        std::cout << "File List count "<< out.size() << std::endl;
+        std::cout << "File List count "<< out->size() << std::endl;
         delete [] ins;
         return out;
     }
@@ -1119,11 +1119,11 @@ namespace YorkNet {
         
     }
     
-    const char* YorkNetwork::getDataFromFileList(std::map<std::string, FileListOne> ins)
+    const char* YorkNetwork::getDataFromFileList(std::map<std::string, FileListOne>* ins)
     {
         std::string toSave = "";
         std::map<std::string, YorkNetwork::FileListOne>::iterator itor;
-        for (itor = ins.begin(); itor != ins.end(); itor++)
+        for (itor = ins->begin(); itor != ins->end(); itor++)
         {
             FileListOne one = itor->second;
             toSave.append(one.name);

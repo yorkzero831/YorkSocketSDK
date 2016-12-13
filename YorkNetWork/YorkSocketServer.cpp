@@ -171,7 +171,7 @@ namespace YorkNet {
                 std::cin >> id;
                 
                 //sentFileToSocket(id, "2", "json",SentingFile());
-                sentFileRequestToSocket(id, getDataFromFileList(_fileList), _fileList.size(), HeaderType::FILE_REQUEST_NEED_TO_SEND);
+                sentFileRequestToSocket(id, getDataFromFileList(_fileList), _fileList->size(), HeaderType::FILE_REQUEST_NEED_TO_SEND);
             }
             
         commandSystem();
@@ -210,8 +210,9 @@ namespace YorkNet {
 				}
                 
                 std::thread* waitingMessage = new std::thread(&YorkNet::YorkSocketServer::ListenToClient, this, clientSocket, ctrr);
-                waitingMessage->detach();
                 waitingMessageThreads.insert(std::pair<int, std::thread*>(clientSocket, waitingMessage));
+                waitingMessage->detach();
+                
 			}
 			
 		}
@@ -224,7 +225,7 @@ namespace YorkNet {
         bool doneSend                               = false;
         while (1)
         {
-            std::this_thread::sleep_for(heartBeatC/5);
+            std::this_thread::sleep_for(heartBeatC);
             CheckerHeader checkHeader;
             size_t buf_Pointer                          = 0;
             char chectHeaderBuff[CHECKER_HEADER_LENGTH] = { 0 };
@@ -239,7 +240,7 @@ namespace YorkNet {
                     {
                         std::cout << key << " Removed" << std::endl;
                         clientSockets.erase(socketID);
-                        close(clientSocket);
+                        close(socketID);
                         delete waitingMessageThreads[socketID];
                         waitingMessageThreads.erase(socketID);
                         fileNeedToDoList.erase(socketID);
@@ -371,18 +372,19 @@ namespace YorkNet {
         }
 	}
     
-    void YorkSocketServer::didGetFileList(std::map<std::string, FileListOne> ins, const int &socketID)
+    void YorkSocketServer::didGetFileList(std::map<std::string, FileListOne>* ins, const int &socketID)
     {
         clientFileRequestStatus.insert(std::pair<int, FileRequestStatus>(socketID, FileRequestStatus()));
         std::cout << "Get File List" << std::endl;
-        //std::map<std::string, FileListOne> tempList = ins;
-        std::map<std::string, FileListOne> localFileList = _fileList;
+
+        
+        std::map<std::string, FileListOne>* localFileList = new std::map<std::string, FileListOne>(*_fileList) ;
         
         FileNeedToDo thisSocketNeedToDo =  fileNeedToDoList[socketID];
         std::map<std::string, FileListOne>::iterator itor;
-        for (itor = _fileList.begin(); itor != _fileList.end(); itor++)
+        for (itor = _fileList->begin(); itor != _fileList->end(); itor++)
         {
-            int inVersion = ins[itor->first].version;
+            int inVersion = ins->operator[](itor->first).version;
             int version   = itor->second.version;
             if(inVersion)
             {
@@ -399,7 +401,7 @@ namespace YorkNet {
                     itor->second.version = inVersion;
                     //tempList.erase(itor->first);
                 }
-                ins.erase(itor->first);
+                ins->erase(itor->first);
             }
             else
             {
@@ -408,10 +410,10 @@ namespace YorkNet {
             
         }
         
-        for (itor = ins.begin(); itor != ins.end(); itor++)
+        for (itor = ins->begin(); itor != ins->end(); itor++)
         {
             thisSocketNeedToDo.needToReceive.push_back(itor->second);
-            localFileList.insert(std::pair<std::string, FileListOne>(itor->first,itor->second));
+            localFileList->insert(std::pair<std::string, FileListOne>(itor->first,itor->second));
         }
         
         std::cout << "Compare FileList Finished" << std::endl;
@@ -476,7 +478,7 @@ namespace YorkNet {
         
     }
     
-    void YorkSocketServer::waitForRequestStatus(const int& socketID, std::map<std::string, FileListOne>list)
+    void YorkSocketServer::waitForRequestStatus(const int& socketID, std::map<std::string, FileListOne>*list)
     {
         while (1)
         {

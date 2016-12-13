@@ -54,7 +54,7 @@ namespace YorkNet {
 		void SentMessageTo(int socketID, std::string words, int64_t tag, int64_t IOB = 1, int64_t TOB =1);
 		void SentMessageToALL(std::string words, int64_t tag, int64_t IOB = 1, int64_t TOB =1);
         
-        virtual void didGetFileList(std::map<std::string, FileListOne> ins, const int &socketID);
+        virtual void didGetFileList(std::map<std::string, FileListOne>* ins, const int &socketID);
         
         //virtual void didGetFileRequestList(std::map<std::string, FileListOne> ins, const int &socketID);
         virtual void didGetCommand(const CommandHeader &inCmd, const int &socketID);
@@ -88,7 +88,7 @@ namespace YorkNet {
         void ListenToClient(int socketID, std::string key);
         void commandSystem();
         
-        void waitForRequestStatus(const int &socketID, std::map<std::string, FileListOne>list);
+        void waitForRequestStatus(const int &socketID, std::map<std::string, FileListOne>*list);
         
         
 		

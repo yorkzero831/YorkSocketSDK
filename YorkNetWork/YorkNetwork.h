@@ -339,7 +339,7 @@ namespace YorkNet {
         
         HostType hostType = HostType::NOTYPE;
         
-        std::map<std::string, FileListOne> _fileList        = std::map<std::string, FileListOne>();
+        std::map<std::string, FileListOne>* _fileList        = new std::map<std::string, FileListOne>();
         
         
 		void ShowErrorMessage(ErrorMessage message);
@@ -405,15 +405,15 @@ namespace YorkNet {
         
         virtual const char* getFileListDataFormFile();
         
-        virtual std::map<std::string, FileListOne> getFileListFromData(const char* ins);
+        virtual std::map<std::string, FileListOne>* getFileListFromData(const char* ins);
         
-        virtual const char* getDataFromFileList(std::map<std::string, FileListOne> ins);
+        virtual const char* getDataFromFileList(std::map<std::string, FileListOne>* ins);
         
         virtual const char* getDataFromFileList(std::vector<FileListOne> ins);
         
-        virtual void didGetFileList(std::map<std::string, FileListOne> ins, const int &socketID){};
+        virtual void didGetFileList(std::map<std::string, FileListOne>* ins, const int &socketID){};
         
-        virtual void didGetFileRequestList(std::map<std::string, FileListOne> ins, const int &socketID, const HeaderType &type){};
+        virtual void didGetFileRequestList(std::map<std::string, FileListOne>* ins, const int &socketID, const HeaderType &type){};
         
         virtual void didGetCommand(const CommandHeader &inCmd, const int &socketID){};
         
